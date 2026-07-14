@@ -24,4 +24,14 @@ enum ClinicalLevel: string
             self::ADVANCED_PARAMEDIC => 'Advanced Paramedic',
         };
     }
+
+    public function badgeClass(): string
+    {
+        return match($this) {
+            self::CFR, self::FAR, self::EFR => 'badge-soft badge-error',
+            self::EMT => 'badge-soft badge-success',
+            self::PARAMEDIC => 'badge-soft badge-info',
+            self::ADVANCED_PARAMEDIC => 'badge-soft badge-warning',
+        };
+    }
 }

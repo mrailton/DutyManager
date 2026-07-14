@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Member;
+use App\Enums\ClinicalLevel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Member>
- */
 class MemberFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->name(),
+            'clinical_level' => $this->faker->randomElement(ClinicalLevel::cases()),
         ];
     }
 }

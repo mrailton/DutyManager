@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ShowLoginController;
 use App\Http\Controllers\Auth\StoreLoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Members\ListMembersController;
+use App\Http\Controllers\Members\StoreMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
@@ -14,6 +15,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::prefix('members')->as('members.')->group(function (): void {
         Route::get('/', ListMembersController::class)->name('index');
+        Route::post('/', StoreMemberController::class)->name('store');
     });
 
     Route::post('/logout', ProcessLogoutController::class)->name('logout');
