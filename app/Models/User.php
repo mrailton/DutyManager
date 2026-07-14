@@ -20,6 +20,12 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
 
+    public function getGravatarAttribute(): string
+    {
+        $hash = md5(mb_strtolower(mb_trim($this->attributes['email'])));
+        return "https://www.gravatar.com/avatar/{$hash}";
+    }
+
     /**
      * Get the attributes that should be cast.
      *

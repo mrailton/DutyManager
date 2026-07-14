@@ -10,8 +10,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full">
-<div class="min-h-full">
-    <nav class="border-b border-gray-200 bg-white dark:border-white/10 dark:bg-gray-900" x-data="{ mobileOpen: false }">
+<div class="min-h-full" x-data="{ mobileOpen: false, showLogoutConfirm: false }">
+    <x-flash-messages />
+
+    <nav class="border-b border-gray-200 bg-white dark:border-white/10 dark:bg-gray-900">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 justify-between">
                 <div class="flex">
@@ -35,13 +37,13 @@
                         <button @click="open = !open" type="button" class="relative flex max-w-xs items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500" x-bind:aria-expanded="open">
                             <span class="absolute -inset-1.5"></span>
                             <span class="sr-only">Open user menu</span>
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
+                            <img src="{{ Auth::user()->gravatar }}" alt="" class="size-8 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
                         </button>
 
                         <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg outline outline-black/5 dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5">Your profile</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5">Settings</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5">Sign out</a>
+                            <a href="#" @click.prevent="open = false; showLogoutConfirm = true" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5">Sign out</a>
                         </div>
                     </div>
                 </div>
@@ -70,7 +72,7 @@
             <div class="border-t border-gray-200 pt-4 pb-3 dark:border-gray-700">
                 <div class="flex items-center px-4">
                     <div class="shrink-0">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-10 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
+                        <img src="{{ Auth::user()->gravatar }}" alt="" class="size-10 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
                     </div>
                     <div class="ml-3">
                         <div class="text-base font-medium text-gray-800 dark:text-white">Tom Cook</div>
@@ -87,7 +89,7 @@
                 <div class="mt-3 space-y-1">
                     <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200">Your profile</a>
                     <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200">Settings</a>
-                    <a href="#" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200">Sign out</a>
+                    <a href="#" @click.prevent="mobileOpen = false; showLogoutConfirm = true" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200">Sign out</a>
                 </div>
             </div>
         </div>
@@ -98,6 +100,22 @@
             {{ $slot }}
         </div>
     </main>
+
+    <form method="POST" action="{{ route('logout') }}" id="logout-form" class="hidden">
+        @csrf
+    </form>
+
+    <div x-show="showLogoutConfirm" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" @click="showLogoutConfirm = false"></div>
+        <div class="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Confirm Sign Out</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Are you sure you want to sign out?</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" @click="showLogoutConfirm = false" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:ring-gray-600 dark:hover:bg-gray-600">Cancel</button>
+                <button type="button" @click="document.getElementById('logout-form').submit()" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign out</button>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
