@@ -69,22 +69,13 @@
         </div>
     </div>
 
-    <dialog x-ref="deleteModal" class="modal">
-        <div class="modal-box">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h3 class="text-lg font-bold">Delete User</h3>
-            <p class="mt-4 text-sm">Are you sure you want to delete <strong>{{ $user->name }}</strong>? This action can be undone by an administrator.</p>
-            <form action="{{ route('users.delete', $user) }}" method="POST" class="modal-action">
-                @csrf
-                @method('DELETE')
-                <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Cancel</button>
-                <button type="submit" class="btn btn-error">Delete</button>
-            </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
+    <x-modal name="deleteModal" title="Delete User">
+        <p class="mt-4 text-sm">Are you sure you want to delete <strong>{{ $user->name }}</strong>? This action can be undone by an administrator.</p>
+        <form action="{{ route('users.delete', $user) }}" method="POST" class="modal-action">
+            @csrf
+            @method('DELETE')
+            <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Cancel</button>
+            <button type="submit" class="btn btn-error">Delete</button>
         </form>
-    </dialog>
+    </x-modal>
 </x-layout.app>

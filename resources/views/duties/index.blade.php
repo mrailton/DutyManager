@@ -57,79 +57,70 @@
         </div>
     </div>
 
-    <dialog x-ref="createModal" class="modal">
-        <div class="modal-box max-w-2xl">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h3 class="text-lg font-bold">Add Duty</h3>
-            <form action="{{ route('duties.store') }}" method="POST" class="mt-4">
-                @csrf
+    <x-modal name="createModal" title="Add Duty" width="max-w-2xl">
+        <form action="{{ route('duties.store') }}" method="POST" class="mt-4">
+            @csrf
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="fieldset-label">Name</label>
-                        <input type="text" name="name" required class="input w-full" placeholder="Duty name" />
-                    </div>
-                    <div>
-                        <label class="fieldset-label">Organiser</label>
-                        <input type="text" name="organiser" required class="input w-full" placeholder="Organiser name" />
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="fieldset-label">Name</label>
+                    <input type="text" name="name" required class="input w-full" placeholder="Duty name" />
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="fieldset-label">Start Time</label>
-                        <input type="datetime-local" name="start_time" required class="input w-full" />
-                    </div>
-                    <div>
-                        <label class="fieldset-label">End Time</label>
-                        <input type="datetime-local" name="end_time" required class="input w-full" />
-                    </div>
+                <div>
+                    <label class="fieldset-label">Organiser</label>
+                    <input type="text" name="organiser" required class="input w-full" placeholder="Organiser name" />
                 </div>
+            </div>
 
-                <div class="mt-4 flex items-center gap-2">
-                    <input type="checkbox" name="covered" value="1" class="checkbox" id="duty-covered" />
-                    <label for="duty-covered" class="fieldset-label">Covered</label>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="fieldset-label">Start Time</label>
+                    <input type="datetime-local" name="start_time" required class="input w-full" />
                 </div>
-
-                <div class="mt-4">
-                    <label class="fieldset-label">Notes</label>
-                    <textarea name="notes" class="textarea w-full" placeholder="Optional notes" rows="3"></textarea>
+                <div>
+                    <label class="fieldset-label">End Time</label>
+                    <input type="datetime-local" name="end_time" required class="input w-full" />
                 </div>
+            </div>
 
-                <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="fieldset-label">Members</label>
-                        <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
-                            @foreach (App\Models\Member::all() as $member)
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="checkbox checkbox-sm" />
-                                    <span class="text-sm">{{ $member->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div>
-                        <label class="fieldset-label">Vehicles</label>
-                        <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
-                            @foreach (App\Models\Vehicle::all() as $vehicle)
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" name="vehicle_ids[]" value="{{ $vehicle->id }}" class="checkbox checkbox-sm" />
-                                    <span class="text-sm">{{ $vehicle->callsign }} — {{ $vehicle->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
+            <div class="mt-4 flex items-center gap-2">
+                <input type="checkbox" name="covered" value="1" class="checkbox" id="duty-covered" />
+                <label for="duty-covered" class="fieldset-label">Covered</label>
+            </div>
+
+            <div class="mt-4">
+                <label class="fieldset-label">Notes</label>
+                <textarea name="notes" class="textarea w-full" placeholder="Optional notes" rows="3"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="fieldset-label">Members</label>
+                    <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
+                        @foreach (App\Models\Member::all() as $member)
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="checkbox checkbox-sm" />
+                                <span class="text-sm">{{ $member->name }}</span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
-
-                <div class="modal-action">
-                    <button type="submit" class="btn btn-primary">Create Duty</button>
+                <div>
+                    <label class="fieldset-label">Vehicles</label>
+                    <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
+                        @foreach (App\Models\Vehicle::all() as $vehicle)
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="vehicle_ids[]" value="{{ $vehicle->id }}" class="checkbox checkbox-sm" />
+                                <span class="text-sm">{{ $vehicle->callsign }} — {{ $vehicle->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
                 </div>
-            </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
+            </div>
+
+            <div class="modal-action">
+                <button type="submit" class="btn btn-primary">Create Duty</button>
+            </div>
         </form>
-    </dialog>
+    </x-modal>
 </x-layout.app>

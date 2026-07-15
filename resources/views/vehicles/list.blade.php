@@ -49,70 +49,52 @@
         </div>
     </div>
 
-    <dialog x-ref="createModal" class="modal">
-        <div class="modal-box">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h3 class="text-lg font-bold">Add Vehicle</h3>
-            <form action="{{ route('vehicles.store') }}" method="POST" class="mt-4">
+    <x-modal name="createModal" title="Add Vehicle">
+        <form action="{{ route('vehicles.store') }}" method="POST" class="mt-4">
+            @csrf
+            <label class="fieldset-label">Callsign</label>
+            <input type="text" name="callsign" required class="input w-full" placeholder="e.g. DUTY-1" />
+
+            <label class="fieldset-label mt-4">Name</label>
+            <input type="text" name="name" required class="input w-full" placeholder="Vehicle name" />
+
+            <label class="fieldset-label mt-4">Role</label>
+            <select name="role" required class="select w-full">
+                <option value="" disabled selected>Select role</option>
+                @foreach (App\Enums\VehicleRole::cases() as $role)
+                    <option value="{{ $role->value }}">{{ $role->label() }}</option>
+                @endforeach
+            </select>
+
+            <div class="modal-action">
+                <button type="submit" class="btn btn-primary">Create Vehicle</button>
+            </div>
+        </form>
+    </x-modal>
+
+    <div x-data="{ editItem: { id: null, callsign: '', name: '', role: '' } }">
+        <x-modal name="editModal" title="Edit Vehicle">
+            <form :action="`/vehicles/${editItem.id}`" method="POST" class="mt-4">
                 @csrf
+                @method('PUT')
                 <label class="fieldset-label">Callsign</label>
-                <input type="text" name="callsign" required class="input w-full" placeholder="e.g. DUTY-1" />
+                <input type="text" name="callsign" required class="input w-full" x-model="editItem.callsign" />
 
                 <label class="fieldset-label mt-4">Name</label>
-                <input type="text" name="name" required class="input w-full" placeholder="Vehicle name" />
+                <input type="text" name="name" required class="input w-full" x-model="editItem.name" />
 
                 <label class="fieldset-label mt-4">Role</label>
-                <select name="role" required class="select w-full">
-                    <option value="" disabled selected>Select role</option>
+                <select name="role" required class="select w-full" x-model="editItem.role">
+                    <option value="" disabled>Select role</option>
                     @foreach (App\Enums\VehicleRole::cases() as $role)
                         <option value="{{ $role->value }}">{{ $role->label() }}</option>
                     @endforeach
                 </select>
 
                 <div class="modal-action">
-                    <button type="submit" class="btn btn-primary">Create Vehicle</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
-
-    <div x-data="{ editItem: { id: null, callsign: '', name: '', role: '' } }">
-        <dialog x-ref="editModal" class="modal">
-            <div class="modal-box">
-                <form method="dialog">
-                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                </form>
-                <h3 class="text-lg font-bold">Edit Vehicle</h3>
-                <form :action="`/vehicles/${editItem.id}`" method="POST" class="mt-4">
-                    @csrf
-                    @method('PUT')
-                    <label class="fieldset-label">Callsign</label>
-                    <input type="text" name="callsign" required class="input w-full" x-model="editItem.callsign" />
-
-                    <label class="fieldset-label mt-4">Name</label>
-                    <input type="text" name="name" required class="input w-full" x-model="editItem.name" />
-
-                    <label class="fieldset-label mt-4">Role</label>
-                    <select name="role" required class="select w-full" x-model="editItem.role">
-                        <option value="" disabled>Select role</option>
-                        @foreach (App\Enums\VehicleRole::cases() as $role)
-                            <option value="{{ $role->value }}">{{ $role->label() }}</option>
-                        @endforeach
-                    </select>
-
-                    <div class="modal-action">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
+        </x-modal>
     </div>
 </x-layout.app>

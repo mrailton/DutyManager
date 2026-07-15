@@ -59,74 +59,56 @@
         </div>
     </div>
 
-    <dialog x-ref="createModal" class="modal">
-        <div class="modal-box">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h3 class="text-lg font-bold">Add Member</h3>
-            <form action="{{ route('members.store') }}" method="POST" class="mt-4">
+    <x-modal name="createModal" title="Add Member">
+        <form action="{{ route('members.store') }}" method="POST" class="mt-4">
+            @csrf
+            <label class="fieldset-label">Name</label>
+            <input type="text" name="name" required class="input w-full" placeholder="Full name" />
+
+            <label class="fieldset-label mt-4">Clinical Level</label>
+            <select name="clinical_level" required class="select w-full">
+                <option value="" disabled selected>Select level</option>
+                @foreach (App\Enums\ClinicalLevel::cases() as $level)
+                    <option value="{{ $level->value }}">{{ $level->label() }}</option>
+                @endforeach
+            </select>
+
+            <div class="mt-4 flex items-center gap-2">
+                <input type="checkbox" name="driver" value="1" class="checkbox" id="driver-checkbox" />
+                <label for="driver-checkbox" class="fieldset-label">Driver</label>
+            </div>
+
+            <div class="modal-action">
+                <button type="submit" class="btn btn-primary">Create Member</button>
+            </div>
+        </form>
+    </x-modal>
+
+    <div x-data="{ editItem: { id: null, name: '', clinical_level: '', driver: false } }">
+        <x-modal name="editModal" title="Edit Member">
+            <form :action="`/members/${editItem.id}`" method="POST" class="mt-4">
                 @csrf
+                @method('PUT')
                 <label class="fieldset-label">Name</label>
-                <input type="text" name="name" required class="input w-full" placeholder="Full name" />
+                <input type="text" name="name" required class="input w-full" x-model="editItem.name" />
 
                 <label class="fieldset-label mt-4">Clinical Level</label>
-                <select name="clinical_level" required class="select w-full">
-                    <option value="" disabled selected>Select level</option>
+                <select name="clinical_level" required class="select w-full" x-model="editItem.clinical_level">
+                    <option value="" disabled>Select level</option>
                     @foreach (App\Enums\ClinicalLevel::cases() as $level)
                         <option value="{{ $level->value }}">{{ $level->label() }}</option>
                     @endforeach
                 </select>
 
                 <div class="mt-4 flex items-center gap-2">
-                    <input type="checkbox" name="driver" value="1" class="checkbox" id="driver-checkbox" />
-                    <label for="driver-checkbox" class="fieldset-label">Driver</label>
+                    <input type="checkbox" name="driver" value="1" class="checkbox" id="edit-driver-checkbox" x-model="editItem.driver" />
+                    <label for="edit-driver-checkbox" class="fieldset-label">Driver</label>
                 </div>
 
                 <div class="modal-action">
-                    <button type="submit" class="btn btn-primary">Create Member</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
-
-    <div x-data="{ editItem: { id: null, name: '', clinical_level: '', driver: false } }">
-        <dialog x-ref="editModal" class="modal">
-            <div class="modal-box">
-                <form method="dialog">
-                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                </form>
-                <h3 class="text-lg font-bold">Edit Member</h3>
-                <form :action="`/members/${editItem.id}`" method="POST" class="mt-4">
-                    @csrf
-                    @method('PUT')
-                    <label class="fieldset-label">Name</label>
-                    <input type="text" name="name" required class="input w-full" x-model="editItem.name" />
-
-                    <label class="fieldset-label mt-4">Clinical Level</label>
-                    <select name="clinical_level" required class="select w-full" x-model="editItem.clinical_level">
-                        <option value="" disabled>Select level</option>
-                        @foreach (App\Enums\ClinicalLevel::cases() as $level)
-                            <option value="{{ $level->value }}">{{ $level->label() }}</option>
-                        @endforeach
-                    </select>
-
-                    <div class="mt-4 flex items-center gap-2">
-                        <input type="checkbox" name="driver" value="1" class="checkbox" id="edit-driver-checkbox" x-model="editItem.driver" />
-                        <label for="edit-driver-checkbox" class="fieldset-label">Driver</label>
-                    </div>
-
-                    <div class="modal-action">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
+        </x-modal>
     </div>
 </x-layout.app>

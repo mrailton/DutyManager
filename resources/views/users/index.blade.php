@@ -55,62 +55,45 @@
         </div>
     </div>
 
-    <dialog x-ref="createModal" class="modal" x-init="@if ($errors->has('name') || $errors->has('email')) $el.showModal() @endif">
-        <div class="modal-box">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <h3 class="text-lg font-bold">Add User</h3>
-            <form action="{{ route('users.store') }}" method="POST" class="mt-4">
-                @csrf
-                <label class="fieldset-label">Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" required class="input w-full @error('name') input-error @enderror" placeholder="Full name" />
-                @error('name')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
+    <x-modal name="createModal" title="Add User"
+        x-init="@if ($errors->has('name') || $errors->has('email')) $el.showModal() @endif">
+        <form action="{{ route('users.store') }}" method="POST" class="mt-4">
+            @csrf
+            <label class="fieldset-label">Name</label>
+            <input type="text" name="name" value="{{ old('name') }}" required class="input w-full @error('name') input-error @enderror" placeholder="Full name" />
+            @error('name')
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+            @enderror
 
-                <label class="fieldset-label mt-4">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required class="input w-full @error('email') input-error @enderror" placeholder="Email address" />
-                @error('email')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
+            <label class="fieldset-label mt-4">Email</label>
+            <input type="email" name="email" value="{{ old('email') }}" required class="input w-full @error('email') input-error @enderror" placeholder="Email address" />
+            @error('email')
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+            @enderror
 
-                <p class="mt-4 text-sm text-base-content/60">An invitation email will be sent with instructions to set a password.</p>
+            <p class="mt-4 text-sm text-base-content/60">An invitation email will be sent with instructions to set a password.</p>
 
-                <div class="modal-action">
-                    <button type="submit" class="btn btn-primary">Create User</button>
-                </div>
-            </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
+            <div class="modal-action">
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
         </form>
-    </dialog>
+    </x-modal>
 
     @if (session('reactivate_user'))
-        <dialog x-ref="reactivateModal" class="modal" x-init="$el.showModal()">
-            <div class="modal-box">
+        <x-modal name="reactivateModal" title="Account Already Exists" x-init="$el.showModal()">
+            <p class="mt-4 text-sm">
+                A user account for <strong>{{ old('email') }}</strong> already exists but has been deleted. You can reactivate it to send a new invitation, or use a different email address.
+            </p>
+            <div class="modal-action">
                 <form method="dialog">
-                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <button class="btn btn-ghost">Use different email</button>
                 </form>
-                <h3 class="text-lg font-bold">Account Already Exists</h3>
-                <p class="mt-4 text-sm">
-                    A user account for <strong>{{ old('email') }}</strong> already exists but has been deleted. You can reactivate it to send a new invitation, or use a different email address.
-                </p>
-                <div class="modal-action">
-                    <form method="dialog">
-                        <button class="btn btn-ghost">Use different email</button>
-                    </form>
-                    <form action="{{ route('users.reactivate', session('reactivate_user')) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="name" value="{{ old('name') }}" />
-                        <button type="submit" class="btn btn-primary">Reactivate account</button>
-                    </form>
-                </div>
+                <form action="{{ route('users.reactivate', session('reactivate_user')) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="name" value="{{ old('name') }}" />
+                    <button type="submit" class="btn btn-primary">Reactivate account</button>
+                </form>
             </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
+        </x-modal>
     @endif
 </x-layout.app>
