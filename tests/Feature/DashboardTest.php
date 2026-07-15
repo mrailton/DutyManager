@@ -8,6 +8,7 @@ use App\Models\Duty;
 use App\Models\Member;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -54,6 +55,10 @@ class DashboardTest extends TestCase
         $response->assertSee('Avg Duties / Member');
         $response->assertSee('Active Members');
         $response->assertSee('Total Vehicles');
+        $response->assertSee('Uncovered Upcoming Duties (30 Days)');
+        $response->assertSee('Assigned Hours by Clinical Level');
+        $response->assertSee('Duty Duration Insights');
+        $response->assertSee('Period-over-Period Change');
     }
 
     #[Test]
@@ -140,6 +145,11 @@ class DashboardTest extends TestCase
         $response->assertViewHas('averageMembersPerDuty', 0);
         $response->assertViewHas('averageDutiesPerMember', 0);
         $response->assertViewHas('busiestVehicle', null);
+        $response->assertViewHas('uncoveredUpcomingDuties', 0);
+        $response->assertViewHas('upcomingUncoveredDuties', fn ($duties) => $duties->isEmpty());
+        $response->assertViewHas('assignedHoursByClinicalLevel', []);
+        $response->assertViewHas('durationInsights', fn (array $insights) => 0.0 === $insights['average_hours']);
+        $response->assertViewHas('periodChanges');
     }
 
     #[Test]
@@ -187,5 +197,176 @@ class DashboardTest extends TestCase
         $response->assertViewHas('busiestMembers');
         $this->assertCount(5, $response->viewData('busiestMembers'));
         $this->assertEquals($busyMember->id, $response->viewData('busiestMembers')->first()->id);
+        $this->assertEquals(8.0, $response->viewData('busiestMembers')->first()->assigned_hours);
+    }
+
+    #[Test]
+    public function volunteer_hours_and_busiest_members_only_use_completed_duties(): void
+    {
+        $this->travelTo(Carbon::parse('2026-07-15 12:00:00'));
+
+        $user = User::factory()->create();
+        $memberCompleted = Member::factory()->create();
+        $memberFuture = Member::factory()->create();
+
+        $completedDutyOne = Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-10 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-10 10:00:00'),
+        ]);
+        $completedDutyTwo = Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-11 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-11 09:00:00'),
+        ]);
+        $futureDutyOne = Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-20 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-20 12:00:00'),
+        ]);
+        $futureDutyTwo = Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-21 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-21 12:00:00'),
+        ]);
+        $futureDutyThree = Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-22 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-22 12:00:00'),
+        ]);
+
+        $completedDutyOne->members()->attach($memberCompleted->id);
+        $completedDutyTwo->members()->attach($memberCompleted->id);
+        $futureDutyOne->members()->attach($memberFuture->id);
+        $futureDutyTwo->members()->attach($memberFuture->id);
+        $futureDutyThree->members()->attach($memberFuture->id);
+
+        $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
+
+        $response->assertViewHas('totalVolunteerHours', 3);
+        $response->assertViewHas('busiestMembers');
+        $this->assertEquals($memberCompleted->id, $response->viewData('busiestMembers')->first()->id);
+        $this->assertEquals(2, $response->viewData('busiestMembers')->first()->duties_count);
+        $this->assertEquals(3.0, $response->viewData('busiestMembers')->first()->assigned_hours);
+
+        $this->travelBack();
+    }
+
+    #[Test]
+    public function it_segments_total_duties_into_completed_and_upcoming(): void
+    {
+        $this->travelTo(Carbon::parse('2026-07-15 12:00:00'));
+
+        $user = User::factory()->create();
+
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-10 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-10 10:00:00'),
+        ]);
+
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-16 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-16 10:00:00'),
+        ]);
+
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-15 10:00:00'),
+            'end_time' => Carbon::parse('2026-07-15 14:00:00'),
+        ]);
+
+        $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
+
+        $response->assertViewHas('totalDuties', 3);
+        $response->assertViewHas('completedDuties', 1);
+        $response->assertViewHas('upcomingDuties', 2);
+        $response->assertSee('Completed: 1');
+        $response->assertSee('Upcoming: 2');
+
+        $this->travelBack();
+    }
+
+    #[Test]
+    public function it_calculates_requested_new_dashboard_metrics(): void
+    {
+        $this->travelTo(Carbon::parse('2026-07-15 12:00:00'));
+
+        $user = User::factory()->create();
+        $members = Member::factory()->count(10)->create(['clinical_level' => 'EMT']);
+        $members[1]->update(['clinical_level' => 'CFR']);
+        $vehicleOne = Vehicle::factory()->create();
+        $vehicleTwo = Vehicle::factory()->create();
+
+        $dutyA = Duty::factory()->create([
+            'name' => 'Duty A',
+            'start_time' => Carbon::parse('2026-07-10 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-10 12:00:00'),
+            'covered' => true,
+        ]);
+        $dutyB = Duty::factory()->create([
+            'name' => 'Duty B',
+            'start_time' => Carbon::parse('2026-07-11 08:00:00'),
+            'end_time' => Carbon::parse('2026-07-11 10:00:00'),
+            'covered' => false,
+        ]);
+        $dutyC = Duty::factory()->create([
+            'name' => 'Duty C',
+            'start_time' => Carbon::parse('2026-07-12 10:00:00'),
+            'end_time' => Carbon::parse('2026-07-12 14:00:00'),
+            'covered' => true,
+        ]);
+        $dutyD = Duty::factory()->create([
+            'name' => 'Duty D',
+            'start_time' => Carbon::parse('2026-07-12 12:00:00'),
+            'end_time' => Carbon::parse('2026-07-12 16:00:00'),
+            'covered' => false,
+        ]);
+
+        $previousDuty = Duty::factory()->create([
+            'name' => 'Previous Duty',
+            'start_time' => Carbon::parse('2026-06-20 08:00:00'),
+            'end_time' => Carbon::parse('2026-06-20 10:00:00'),
+            'covered' => true,
+        ]);
+
+        $dutyA->members()->attach([$members[0]->id, $members[1]->id]);
+        $dutyB->members()->attach([$members[0]->id]);
+        $dutyC->members()->attach([$members[0]->id]);
+        $dutyD->members()->attach([$members[0]->id]);
+        $previousDuty->members()->attach([$members[1]->id]);
+
+        $dutyA->vehicles()->attach([$vehicleTwo->id]);
+        $dutyC->vehicles()->attach([$vehicleOne->id]);
+        $dutyD->vehicles()->attach([$vehicleOne->id]);
+
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-16 09:00:00'),
+            'end_time' => Carbon::parse('2026-07-16 11:00:00'),
+            'covered' => false,
+        ]);
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-18 09:00:00'),
+            'end_time' => Carbon::parse('2026-07-18 11:00:00'),
+            'covered' => false,
+        ]);
+        Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-19 09:00:00'),
+            'end_time' => Carbon::parse('2026-07-19 11:00:00'),
+            'covered' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-15');
+
+        $response->assertViewHas('uncoveredUpcomingDuties', 2);
+        $response->assertViewHas('upcomingUncoveredDuties', fn ($duties): bool => 2 === $duties->count());
+        $response->assertSee('Uncovered Upcoming Duties (30 Days)');
+        $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-16')->firstOrFail()));
+        $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-18')->firstOrFail()));
+        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => 'EMT' === $rows[0]['level']
+                && 14 === $rows[0]['hours']
+                && 'CFR' === $rows[1]['level']
+                && 4 === $rows[1]['hours']);
+        $response->assertViewHas('durationInsights', fn (array $insights): bool => 3.5 === $insights['average_hours']
+                && 4.0 === $insights['longest']['hours']
+                && 2.0 === $insights['shortest']['hours']);
+        $response->assertViewHas('periodChanges', fn (array $changes): bool => 300.0 === $changes['duties']
+                && 800.0 === $changes['volunteer_hours']
+                && 0.0 === $changes['average_members_per_duty']);
+
+        $this->travelBack();
     }
 }

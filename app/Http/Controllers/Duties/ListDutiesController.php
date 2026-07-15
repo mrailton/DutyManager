@@ -15,7 +15,7 @@ class ListDutiesController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        $duties = Duty::paginate();
+        $duties = Duty::query()->orderByDesc('start_time')->paginate();
         $members = Member::query()->orderBy('name')->get();
         $vehicles = Vehicle::query()->orderBy('name')->get();
 

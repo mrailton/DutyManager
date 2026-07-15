@@ -8,6 +8,7 @@ use App\Models\Member;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -369,5 +370,60 @@ class DutyTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    #[Test]
+    public function aDutyCanBeDeletedAndRemovedFromDashboardStats(): void
+    {
+        $this->travelTo(Carbon::parse('2026-07-15 12:00:00'));
+
+        $user = User::factory()->create();
+        $member = Member::factory()->create();
+        $vehicle = Vehicle::factory()->create();
+        $duty = \App\Models\Duty::factory()->create([
+            'start_time' => Carbon::parse('2026-07-10 10:00:00'),
+            'end_time' => Carbon::parse('2026-07-10 12:00:00'),
+        ]);
+        $duty->members()->attach($member->id);
+        $duty->vehicles()->attach($vehicle->id);
+
+        $this->assertDatabaseHas('duty_members', [
+            'duty_id' => $duty->id,
+            'member_id' => $member->id,
+        ]);
+        $this->assertDatabaseHas('duty_vehicles', [
+            'duty_id' => $duty->id,
+            'vehicle_id' => $vehicle->id,
+        ]);
+
+        $response = $this->actingAs($user)->delete('/duties/' . $duty->id);
+
+        $response->assertRedirect('/duties');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
+        $this->assertDatabaseMissing('duties', ['id' => $duty->id]);
+        $this->assertDatabaseMissing('duty_members', [
+            'duty_id' => $duty->id,
+            'member_id' => $member->id,
+        ]);
+        $this->assertDatabaseMissing('duty_vehicles', [
+            'duty_id' => $duty->id,
+            'vehicle_id' => $vehicle->id,
+        ]);
+
+        $dashboardResponse = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
+        $dashboardResponse->assertViewHas('totalDuties', 0);
+
+        $this->travelBack();
+    }
+
+    #[Test]
+    public function aGuestCannotDeleteADuty(): void
+    {
+        $duty = \App\Models\Duty::factory()->create();
+
+        $response = $this->delete('/duties/' . $duty->id);
+
+        $response->assertRedirect('/login');
+        $this->assertDatabaseHas('duties', ['id' => $duty->id]);
     }
 }

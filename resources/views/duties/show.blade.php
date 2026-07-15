@@ -4,7 +4,10 @@
             <a href="{{ route('duties.index') }}" class="text-sm text-base-content/60 hover:text-base-content">&larr; Back to Duties</a>
             <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">{{ $duty->name }}</h1>
         </div>
-        <button @click="$refs.editModal.showModal()" class="btn btn-outline btn-primary">Edit</button>
+        <div class="flex items-center gap-2">
+            <button @click="$refs.editModal.showModal()" class="btn btn-outline btn-primary">Edit</button>
+            <button @click="$refs.deleteDutyModal.showModal()" class="btn btn-outline btn-error">Delete</button>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -175,8 +178,19 @@
             </div>
 
             <div class="modal-action">
+                <button type="button" @click="$refs.deleteDutyModal.showModal()" class="btn btn-outline btn-error mr-auto">Delete Duty</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
+        </form>
+    </x-modal>
+
+    <x-modal name="deleteDutyModal" title="Delete Duty">
+        <p class="mt-4 text-sm">Are you sure you want to delete <strong>{{ $duty->name }}</strong>? This cannot be undone.</p>
+        <form action="{{ route('duties.delete', $duty) }}" method="POST" class="modal-action">
+            @csrf
+            @method('DELETE')
+            <button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Cancel</button>
+            <button type="submit" class="btn btn-error">Delete Duty</button>
         </form>
     </x-modal>
 </x-layout.app>

@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ShowLoginController;
 use App\Http\Controllers\Auth\StoreLoginController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Duties\DeleteDutyController;
 use App\Http\Controllers\Duties\ListDutiesController;
 use App\Http\Controllers\Duties\StoreDutyController;
 use App\Http\Controllers\Duties\UpdateDutyController;
@@ -54,6 +55,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/', StoreDutyController::class)->name('store');
         Route::get('/{duty}', ViewDutyController::class)->name('show');
         Route::put('/{duty}', UpdateDutyController::class)->name('update');
+        Route::delete('/{duty}', DeleteDutyController::class)->name('delete');
     });
 
     Route::prefix('users')->as('users.')->group(function (): void {
