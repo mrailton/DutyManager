@@ -4,12 +4,87 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Duty;
+use App\Models\Member;
+use App\Models\Vehicle;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(Request $request): View
     {
-        return view('dashboard');
+        $now = now();
+        $startDate = $request->filled('start_date')
+            ? Carbon::parse($request->input('start_date'))
+            : $now->copy()->startOfYear();
+        $endDate = $request->filled('end_date')
+            ? Carbon::parse($request->input('end_date'))
+            : $now;
+
+        if ($endDate->isBefore($startDate)) {
+            [$startDate, $endDate] = [$endDate, $startDate];
+        }
+
+        $start = $startDate->copy()->startOfDay();
+        $end = $endDate->copy()->endOfDay();
+
+        $dutiesInRange = Duty::whereBetween('start_time', [$start, $end])
+            ->withCount('members')
+            ->withCount('vehicles')
+            ->get();
+
+        $totalDuties = $dutiesInRange->count();
+
+        $totalVolunteerHours = (int) round($dutiesInRange->sum(
+            fn (Duty $duty) => $duty->members_count * $duty->start_time->diffInHours($duty->end_time, true)
+        ));
+
+        $averageMembersPerDuty = $totalDuties > 0
+            ? round($dutiesInRange->avg('members_count'))
+            : 0;
+
+        $totalMembers = Member::count();
+        $totalMemberAssignments = DB::table('duty_members')
+            ->join('duties', 'duty_members.duty_id', '=', 'duties.id')
+            ->whereBetween('duties.start_time', [$start, $end])
+            ->count();
+
+        $averageDutiesPerMember = $totalMembers > 0
+            ? round($totalMemberAssignments / $totalMembers)
+            : 0;
+
+        $totalVehicles = Vehicle::count();
+
+        $busiestVehicle = Vehicle::select('vehicles.*')
+            ->selectRaw('COUNT(duty_vehicles.duty_id) as duties_count')
+            ->leftJoin('duty_vehicles', 'vehicles.id', '=', 'duty_vehicles.vehicle_id')
+            ->leftJoin('duties', 'duty_vehicles.duty_id', '=', 'duties.id')
+            ->whereBetween('duties.start_time', [$start, $end])
+            ->groupBy('vehicles.id')
+            ->orderByDesc('duties_count')
+            ->first();
+
+        $busiestMonth = $totalDuties > 0
+            ? Carbon::parse($dutiesInRange->groupBy(fn (Duty $d) => $d->start_time->format('Y-m'))
+                ->sortDesc()
+                ->keys()
+                ->first() . '-01')
+            : null;
+
+        return view('dashboard', [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'totalDuties' => $totalDuties,
+            'totalVolunteerHours' => $totalVolunteerHours,
+            'averageMembersPerDuty' => $averageMembersPerDuty,
+            'averageDutiesPerMember' => $averageDutiesPerMember,
+            'totalMembers' => $totalMembers,
+            'totalVehicles' => $totalVehicles,
+            'busiestVehicle' => $busiestVehicle,
+            'busiestMonth' => $busiestMonth,
+        ]);
     }
 }
