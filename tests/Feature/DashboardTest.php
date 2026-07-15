@@ -97,16 +97,26 @@ class DashboardTest extends TestCase
     public function it_calculates_busiest_month(): void
     {
         $user = User::factory()->create();
-        $member = Member::factory()->create();
-        $duty = Duty::factory()->create([
-            'start_time' => now()->subMonth(),
-            'end_time' => now()->subMonth()->addHours(4),
+        $busiestMonthDate = now()->subMonths(2)->startOfMonth()->addDay();
+        $quieterMonthDate = now()->subMonth()->startOfMonth()->addDay();
+
+        Duty::factory()->count(3)->create([
+            'start_time' => $busiestMonthDate->copy()->addHours(8),
+            'end_time' => $busiestMonthDate->copy()->addHours(12),
         ]);
-        $duty->members()->attach($member);
+
+        Duty::factory()->count(1)->create([
+            'start_time' => $quieterMonthDate->copy()->addHours(8),
+            'end_time' => $quieterMonthDate->copy()->addHours(12),
+        ]);
 
         $response = $this->actingAs($user)->get('/');
 
         $response->assertViewHas('busiestMonth');
+        $this->assertSame(
+            $busiestMonthDate->format('Y-m'),
+            $response->viewData('busiestMonth')->format('Y-m')
+        );
     }
 
     #[Test]

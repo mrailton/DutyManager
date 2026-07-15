@@ -13,10 +13,14 @@ class SearchController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $q = $request->string('q');
+        $q = $request->string('q')->trim();
 
         if ($q->isEmpty()) {
-            return response()->noContent();
+            if ($request->header('HX-Request')) {
+                return response('');
+            }
+
+            return redirect()->route('dashboard');
         }
 
         $query = $q->value();

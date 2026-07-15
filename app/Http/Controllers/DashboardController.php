@@ -31,20 +31,26 @@ class DashboardController extends Controller
         $start = $startDate->copy()->startOfDay();
         $end = $endDate->copy()->endOfDay();
 
-        $dutiesInRange = Duty::whereBetween('start_time', [$start, $end])
-            ->withCount('members')
-            ->withCount('vehicles')
-            ->get();
+        $dutiesInRangeQuery = Duty::query()
+            ->whereBetween('start_time', [$start, $end]);
 
-        $totalDuties = $dutiesInRange->count();
+        $totalDuties = (clone $dutiesInRangeQuery)->count();
 
-        $totalVolunteerHours = (int) round($dutiesInRange->sum(
-            fn (Duty $duty) => $duty->members_count * $duty->start_time->diffInHours($duty->end_time, true)
-        ));
+        $totalVolunteerHours = 0;
+        $totalMembersAcrossDuties = 0;
+        $dutiesByMonth = [];
 
-        $averageMembersPerDuty = $totalDuties > 0
-            ? round($dutiesInRange->avg('members_count'))
-            : 0;
+        foreach ((clone $dutiesInRangeQuery)->select(['id', 'start_time', 'end_time'])->withCount('members')->cursor() as $duty) {
+            $totalMembersAcrossDuties += $duty->members_count;
+            $totalVolunteerHours += (int) round(
+                $duty->members_count * $duty->start_time->diffInHours($duty->end_time, true)
+            );
+
+            $month = $duty->start_time->format('Y-m');
+            $dutiesByMonth[$month] = ($dutiesByMonth[$month] ?? 0) + 1;
+        }
+
+        $averageMembersPerDuty = $totalDuties > 0 ? round($totalMembersAcrossDuties / $totalDuties) : 0;
 
         $totalMembers = Member::count();
         $totalMemberAssignments = DB::table('duty_members')
@@ -77,12 +83,11 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $busiestMonth = $totalDuties > 0
-            ? Carbon::parse($dutiesInRange->groupBy(fn (Duty $d) => $d->start_time->format('Y-m'))
-                ->sortDesc()
-                ->keys()
-                ->first() . '-01')
-            : null;
+        $busiestMonth = null;
+
+        if ([] !== $dutiesByMonth) {
+            $busiestMonth = Carbon::createFromFormat('Y-m-d', collect($dutiesByMonth)->sortDesc()->keys()->first() . '-01');
+        }
 
         return view('dashboard', [
             'startDate' => $startDate,

@@ -36,7 +36,7 @@ class FlashMessages extends Component
         $message = $flash['message'] ?? null;
 
         if (null === $message) {
-            foreach (['success', 'info', 'warning', 'danger'] as $t) {
+            foreach (['success', 'info', 'warning', 'danger', 'error'] as $t) {
                 if ($msg = session($t)) {
                     $type = $t;
                     $message = $msg;
@@ -50,7 +50,11 @@ class FlashMessages extends Component
             $message = session('flash_message');
         }
 
-        $this->type = $type ?? 'info';
+        $this->type = match ($type) {
+            'error' => 'danger',
+            null => 'info',
+            default => $type,
+        };
         $this->message = $message ?? '';
 
         $style = self::STYLES[$this->type] ?? self::STYLES['info'];

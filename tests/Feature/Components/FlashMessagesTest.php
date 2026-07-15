@@ -88,4 +88,15 @@ class FlashMessagesTest extends TestCase
         $this->assertSame('From flash array.', $component->message);
     }
 
+    #[Test]
+    public function itMapsErrorTypeToDanger(): void
+    {
+        session()->flash('flash', ['type' => 'error', 'message' => 'Something failed.']);
+
+        $component = app(FlashMessages::class);
+
+        $this->assertSame('danger', $component->type);
+        $this->assertSame('Something failed.', $component->message);
+    }
+
 }

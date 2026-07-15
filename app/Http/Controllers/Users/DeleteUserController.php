@@ -14,7 +14,7 @@ class DeleteUserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return back()->with('flash', [
-                'type' => 'error',
+                'type' => 'danger',
                 'message' => 'You cannot delete your own account.',
             ]);
         }

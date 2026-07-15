@@ -6,6 +6,7 @@ namespace Tests\Feature\Users;
 
 use App\Models\User;
 use App\Notifications\UserInvited;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -229,8 +230,22 @@ class UserTest extends TestCase
 
         $response = $this->actingAs($admin)->delete('/users/' . $admin->id);
 
-        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'error');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'danger');
         $this->assertNotSoftDeleted($admin);
+    }
+
+    #[Test]
+    public function duplicateEmailsAreRejectedAtTheDatabaseLevel(): void
+    {
+        User::factory()->create(['email' => 'duplicate@example.com']);
+
+        $this->expectException(QueryException::class);
+
+        User::create([
+            'name' => 'Duplicate User',
+            'email' => 'duplicate@example.com',
+            'password' => 'password',
+        ]);
     }
 
     #[Test]

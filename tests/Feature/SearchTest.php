@@ -38,7 +38,8 @@ class SearchTest extends TestCase
 
         $response = $this->actingAs($user)->get('/search?q=', ['HX-Request' => 'true']);
 
-        $response->assertNoContent();
+        $response->assertOk();
+        $response->assertContent('');
     }
 
     #[Test]

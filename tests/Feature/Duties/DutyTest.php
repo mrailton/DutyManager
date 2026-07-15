@@ -7,6 +7,8 @@ namespace Tests\Feature\Duties;
 use App\Models\Member;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -331,5 +333,41 @@ class DutyTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('end_time');
+    }
+
+    #[Test]
+    public function duplicateDutyMemberAssignmentsAreRejectedAtTheDatabaseLevel(): void
+    {
+        $duty = \App\Models\Duty::factory()->create();
+        $member = Member::factory()->create();
+
+        $duty->members()->attach($member->id);
+
+        $this->expectException(QueryException::class);
+
+        DB::table('duty_members')->insert([
+            'duty_id' => $duty->id,
+            'member_id' => $member->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    #[Test]
+    public function duplicateDutyVehicleAssignmentsAreRejectedAtTheDatabaseLevel(): void
+    {
+        $duty = \App\Models\Duty::factory()->create();
+        $vehicle = Vehicle::factory()->create();
+
+        $duty->vehicles()->attach($vehicle->id);
+
+        $this->expectException(QueryException::class);
+
+        DB::table('duty_vehicles')->insert([
+            'duty_id' => $duty->id,
+            'vehicle_id' => $vehicle->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
