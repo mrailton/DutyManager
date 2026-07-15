@@ -97,7 +97,7 @@
                 <div>
                     <label class="fieldset-label">Members</label>
                     <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
-                        @foreach (App\Models\Member::all() as $member)
+                        @foreach (App\Models\Member::query()->orderBy('name')->get() as $member)
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="checkbox checkbox-sm" />
                                 <span class="text-sm">{{ $member->name }}</span>
