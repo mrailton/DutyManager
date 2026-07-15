@@ -226,4 +226,110 @@ class DutyTest extends TestCase
 
         $response->assertRedirect('/login');
     }
+
+    #[Test]
+    public function aDutyCanBeCreatedWithSplitDateAndTime(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/duties', [
+            'name' => 'Split Time Duty',
+            'organiser' => 'Test User',
+            'start_date' => '2026-08-01',
+            'start_hour' => '09',
+            'start_minute' => '00',
+            'end_date' => '2026-08-01',
+            'end_hour' => '17',
+            'end_minute' => '30',
+            'covered' => '1',
+        ]);
+
+        $response->assertRedirect('/duties');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
+        $this->assertDatabaseHas('duties', ['name' => 'Split Time Duty']);
+
+        $duty = \App\Models\Duty::where('name', 'Split Time Duty')->first();
+        $this->assertEquals('2026-08-01 09:00:00', $duty->start_time->format('Y-m-d H:i:s'));
+        $this->assertEquals('2026-08-01 17:30:00', $duty->end_time->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function aDutyCanBeUpdatedWithSplitDateAndTime(): void
+    {
+        $user = User::factory()->create();
+        $duty = \App\Models\Duty::factory()->create(['name' => 'Before Update']);
+
+        $response = $this->actingAs($user)->put('/duties/' . $duty->id, [
+            'name' => 'After Update',
+            'organiser' => 'Updated User',
+            'start_date' => '2026-09-01',
+            'start_hour' => '07',
+            'start_minute' => '15',
+            'end_date' => '2026-09-01',
+            'end_hour' => '15',
+            'end_minute' => '45',
+        ]);
+
+        $response->assertRedirect('/duties/' . $duty->id);
+        $duty->refresh();
+        $this->assertEquals('2026-09-01 07:15:00', $duty->start_time->format('Y-m-d H:i:s'));
+        $this->assertEquals('2026-09-01 15:45:00', $duty->end_time->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function splitDateWithInvalidHourFails(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/duties', [
+            'name' => 'Bad Hour',
+            'organiser' => 'Test User',
+            'start_date' => '2026-08-01',
+            'start_hour' => '99',
+            'start_minute' => '00',
+            'end_date' => '2026-08-01',
+            'end_hour' => '17',
+            'end_minute' => '00',
+        ]);
+
+        $response->assertSessionHasErrors('start_time');
+    }
+
+    #[Test]
+    public function splitDateWithInvalidMinuteFails(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/duties', [
+            'name' => 'Bad Minute',
+            'organiser' => 'Test User',
+            'start_date' => '2026-08-01',
+            'start_hour' => '10',
+            'start_minute' => '99',
+            'end_date' => '2026-08-01',
+            'end_hour' => '17',
+            'end_minute' => '00',
+        ]);
+
+        $response->assertSessionHasErrors('start_time');
+    }
+
+    #[Test]
+    public function splitEndTimeMustBeAfterStartTime(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/duties', [
+            'name' => 'Bad Range',
+            'organiser' => 'Test User',
+            'start_date' => '2026-08-01',
+            'start_hour' => '14',
+            'start_minute' => '00',
+            'end_date' => '2026-08-01',
+            'end_hour' => '09',
+            'end_minute' => '00',
+        ]);
+
+        $response->assertSessionHasErrors('end_time');
+    }
 }

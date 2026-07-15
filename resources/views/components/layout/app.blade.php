@@ -25,14 +25,18 @@
                         <a href="{{ route('users.index') }}" aria-current="{{ request()->is('users*') ? 'page' : '' }}" class="{{ request()->is('users*') ? 'inline-flex items-center border-b-2 border-indigo-600 px-1 pt-1 text-sm font-medium text-gray-900 dark:border-indigo-500 dark:text-white' : 'inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-white/20 dark:hover:text-gray-200' }}">Users</a>
                     </div>
                 </div>
-                <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    <button type="button" class="relative rounded-full p-1 text-gray-400 hover:text-gray-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 dark:text-gray-400 dark:hover:text-white dark:focus:outline-indigo-500">
-                        <span class="absolute -inset-1.5"></span>
-                        <span class="sr-only">View notifications</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
-                            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </button>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center sm:gap-3">
+                    <div class="relative" id="search-wrapper">
+                        <input type="search" name="q" placeholder="Search…"
+                               class="input input-sm w-48 lg:w-64"
+                               hx-get="{{ route('search') }}"
+                               hx-trigger="keyup changed delay:300ms"
+                               hx-target="#search-results"
+                               hx-indicator="#search-spinner"
+                               autocomplete="off" />
+                        <span id="search-spinner" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2 size-4 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></span>
+                        <div id="search-results" class="absolute right-0 z-20 mt-1 w-80 lg:w-96"></div>
+                    </div>
 
                     <!-- Profile dropdown -->
                     <div class="relative ml-3" x-data="{ open: false }">
@@ -64,7 +68,20 @@
         </div>
 
         <div x-show="mobileOpen" class="block sm:hidden">
-            <div class="space-y-1 pt-2 pb-3">
+            <div class="px-4 pt-2 pb-3">
+                <div class="relative">
+                    <input type="search" name="q" placeholder="Search…"
+                           class="input input-sm w-full"
+                           hx-get="{{ route('search') }}"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#mobile-search-results"
+                           hx-indicator="#mobile-search-spinner"
+                           autocomplete="off" />
+                    <span id="mobile-search-spinner" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2 size-4 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"></span>
+                </div>
+                <div id="mobile-search-results" class="mt-2"></div>
+            </div>
+            <div class="space-y-1 pb-3">
                 <a href="{{ url('/') }}" aria-current="{{ request()->is('/') ? 'page' : '' }}" class="{{ request()->is('/') ? 'block border-l-4 border-indigo-600 bg-indigo-50 py-2 pr-4 pl-3 text-base font-medium text-indigo-700 dark:border-indigo-500 dark:bg-indigo-600/10 dark:text-indigo-300' : 'block border-l-4 border-transparent py-2 pr-4 pl-3 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:bg-white/5 dark:hover:text-gray-200' }}">Dashboard</a>
                 <a href="{{ route('members.index') }}" aria-current="{{ request()->is('members*') ? 'page' : '' }}" class="{{ request()->is('members*') ? 'block border-l-4 border-indigo-600 bg-indigo-50 py-2 pr-4 pl-3 text-base font-medium text-indigo-700 dark:border-indigo-500 dark:bg-indigo-600/10 dark:text-indigo-300' : 'block border-l-4 border-transparent py-2 pr-4 pl-3 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:bg-white/5 dark:hover:text-gray-200' }}">Members</a>
                 <a href="{{ route('vehicles.index') }}" aria-current="{{ request()->is('vehicles*') ? 'page' : '' }}" class="{{ request()->is('vehicles*') ? 'block border-l-4 border-indigo-600 bg-indigo-50 py-2 pr-4 pl-3 text-base font-medium text-indigo-700 dark:border-indigo-500 dark:bg-indigo-600/10 dark:text-indigo-300' : 'block border-l-4 border-transparent py-2 pr-4 pl-3 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:bg-white/5 dark:hover:text-gray-200' }}">Vehicles</a>
@@ -80,13 +97,6 @@
                         <div class="text-base font-medium text-gray-800 dark:text-white">{{ Auth()->user()->name }}</div>
                         <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ Auth()->user()->email }}</div>
                     </div>
-                    <button type="button" class="relative ml-auto shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 dark:text-gray-400 dark:hover:text-white dark:focus:outline-indigo-500">
-                        <span class="absolute -inset-1.5"></span>
-                        <span class="sr-only">View notifications</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
-                            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </button>
                 </div>
                 <div class="mt-3 space-y-1">
                     <a href="#" @click.prevent="mobileOpen = false; showLogoutConfirm = true" class="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200">Sign out</a>

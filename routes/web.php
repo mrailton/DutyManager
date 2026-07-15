@@ -18,6 +18,7 @@ use App\Http\Controllers\Members\ListMembersController;
 use App\Http\Controllers\Members\StoreMemberController;
 use App\Http\Controllers\Members\UpdateMemberController;
 use App\Http\Controllers\Members\ViewMemberController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Users\DeleteUserController;
 use App\Http\Controllers\Users\ListUsersController;
 use App\Http\Controllers\Users\ReactivateUserController;
@@ -32,6 +33,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/search', SearchController::class)->name('search');
 
     Route::prefix('members')->as('members.')->group(function (): void {
         Route::get('/', ListMembersController::class)->name('index');
