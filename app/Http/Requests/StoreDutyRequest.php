@@ -33,6 +33,12 @@ class StoreDutyRequest extends FormRequest
     {
         $this->merge([
             'covered' => $this->boolean('covered'),
+            'start_time' => $this->start_date && $this->start_hour && $this->start_minute
+                ? $this->start_date . ' ' . $this->start_hour . ':' . $this->start_minute
+                : $this->start_time,
+            'end_time' => $this->end_date && $this->end_hour && $this->end_minute
+                ? $this->end_date . ' ' . $this->end_hour . ':' . $this->end_minute
+                : $this->end_time,
         ]);
     }
 }

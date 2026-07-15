@@ -102,16 +102,42 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                    <label class="fieldset-label">Start Time</label>
-                    <input type="datetime-local" name="start_time" value="{{ $duty->start_time->format('Y-m-d\TH:i') }}" required class="input w-full" />
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="fieldset-label">Start Date</label>
+                        <input type="date" name="start_date" value="{{ $duty->start_time->format('Y-m-d') }}" required class="input w-full" />
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <select name="start_hour" required class="select w-full">
+                                @for ($h = 0; $h <= 23; $h++)
+                                    <option value="{{ sprintf('%02d', $h) }}" @selected($duty->start_time->format('H') === sprintf('%02d', $h))>{{ sprintf('%02d', $h) }}</option>
+                                @endfor
+                            </select>
+                            <select name="start_minute" required class="select w-full">
+                                <option value="00" @selected($duty->start_time->format('i') === '00')>00</option>
+                                <option value="15" @selected($duty->start_time->format('i') === '15')>15</option>
+                                <option value="30" @selected($duty->start_time->format('i') === '30')>30</option>
+                                <option value="45" @selected($duty->start_time->format('i') === '45')>45</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="fieldset-label">End Date</label>
+                        <input type="date" name="end_date" value="{{ $duty->end_time->format('Y-m-d') }}" required class="input w-full" />
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <select name="end_hour" required class="select w-full">
+                                @for ($h = 0; $h <= 23; $h++)
+                                    <option value="{{ sprintf('%02d', $h) }}" @selected($duty->end_time->format('H') === sprintf('%02d', $h))>{{ sprintf('%02d', $h) }}</option>
+                                @endfor
+                            </select>
+                            <select name="end_minute" required class="select w-full">
+                                <option value="00" @selected($duty->end_time->format('i') === '00')>00</option>
+                                <option value="15" @selected($duty->end_time->format('i') === '15')>15</option>
+                                <option value="30" @selected($duty->end_time->format('i') === '30')>30</option>
+                                <option value="45" @selected($duty->end_time->format('i') === '45')>45</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="fieldset-label">End Time</label>
-                    <input type="datetime-local" name="end_time" value="{{ $duty->end_time->format('Y-m-d\TH:i') }}" required class="input w-full" />
-                </div>
-            </div>
 
             <div class="mt-4 flex items-center gap-2">
                 <input type="checkbox" name="covered" value="1" class="checkbox" id="edit-duty-covered" @checked($duty->covered) />
