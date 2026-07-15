@@ -54,11 +54,6 @@
                     <ul class="space-y-2">
                         @forelse($duty->members as $member)
                             <li class="flex items-center gap-2">
-                                <div class="avatar placeholder">
-                                    <div class="size-8 rounded-full bg-neutral text-neutral-content text-xs">
-                                        <span>{{ strtoupper(substr($member->name, 0, 2)) }}</span>
-                                    </div>
-                                </div>
                                 <div>
                                     <div class="text-sm font-medium">{{ $member->name }}</div>
                                     <div class="text-xs text-base-content/60">
