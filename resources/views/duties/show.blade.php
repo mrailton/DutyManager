@@ -153,7 +153,7 @@
                 <div>
                     <label class="fieldset-label">Members</label>
                     <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
-                        @foreach (App\Models\Member::all() as $member)
+                        @foreach ($members as $member)
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="member_ids[]" value="{{ $member->id }}" class="checkbox checkbox-sm" @checked($duty->members->contains($member)) />
                                 <span class="text-sm">{{ $member->name }}</span>
@@ -164,7 +164,7 @@
                 <div>
                     <label class="fieldset-label">Vehicles</label>
                     <div class="mt-1 max-h-48 overflow-y-auto space-y-1 rounded-md border border-base-300 p-2">
-                        @foreach (App\Models\Vehicle::all() as $vehicle)
+                        @foreach ($vehicles as $vehicle)
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="vehicle_ids[]" value="{{ $vehicle->id }}" class="checkbox checkbox-sm" @checked($duty->vehicles->contains($vehicle)) />
                                 <span class="text-sm">{{ $vehicle->callsign }} — {{ $vehicle->name }}</span>
