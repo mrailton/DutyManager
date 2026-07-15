@@ -77,8 +77,8 @@
                         <img src="{{ Auth::user()->gravatar }}" alt="" class="size-10 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
                     </div>
                     <div class="ml-3">
-                        <div class="text-base font-medium text-gray-800 dark:text-white">Tom Cook</div>
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">tom@example.com</div>
+                        <div class="text-base font-medium text-gray-800 dark:text-white">{{ Auth()->user()->name }}</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ Auth()->user()->email }}</div>
                     </div>
                     <button type="button" class="relative ml-auto shrink-0 rounded-full p-1 text-gray-400 hover:text-gray-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 dark:text-gray-400 dark:hover:text-white dark:focus:outline-indigo-500">
                         <span class="absolute -inset-1.5"></span>
