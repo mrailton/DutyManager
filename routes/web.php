@@ -6,6 +6,10 @@ use App\Http\Controllers\Auth\ProcessLogoutController;
 use App\Http\Controllers\Auth\ShowLoginController;
 use App\Http\Controllers\Auth\StoreLoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Duties\ListDutiesController;
+use App\Http\Controllers\Duties\StoreDutyController;
+use App\Http\Controllers\Duties\UpdateDutyController;
+use App\Http\Controllers\Duties\ViewDutyController;
 use App\Http\Controllers\Members\ListMembersController;
 use App\Http\Controllers\Members\StoreMemberController;
 use App\Http\Controllers\Vehicles\ListVehiclesController;
@@ -23,6 +27,13 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('vehicles')->as('vehicles.')->group(function (): void {
         Route::get('/', ListVehiclesController::class)->name('index');
         Route::post('/', StoreVehicleController::class)->name('store');
+    });
+
+    Route::prefix('duties')->as('duties.')->group(function (): void {
+        Route::get('/', ListDutiesController::class)->name('index');
+        Route::post('/', StoreDutyController::class)->name('store');
+        Route::get('/{duty}', ViewDutyController::class)->name('show');
+        Route::put('/{duty}', UpdateDutyController::class)->name('update');
     });
 
     Route::post('/logout', ProcessLogoutController::class)->name('logout');
