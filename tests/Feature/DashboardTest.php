@@ -239,6 +239,10 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
 
         $response->assertViewHas('totalVolunteerHours', 3);
+        $response->assertViewHas('durationInsights', fn (array $insights): bool => 1.5 === $insights['average_hours']
+                && '1h 30m' === $insights['average_label']
+                && '2h 0m' === $insights['longest']['duration_label']
+                && '1h 0m' === $insights['shortest']['duration_label']);
         $response->assertViewHas('busiestMembers');
         $this->assertEquals($memberCompleted->id, $response->viewData('busiestMembers')->first()->id);
         $this->assertEquals(2, $response->viewData('busiestMembers')->first()->duties_count);

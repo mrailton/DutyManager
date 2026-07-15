@@ -101,7 +101,10 @@ class DashboardController extends Controller
         $uncoveredUpcomingDuties = $upcomingUncoveredDuties->count();
 
         $assignedHoursByClinicalLevel = $this->calculateAssignedHoursByClinicalLevel($dutiesInRange);
-        $durationInsights = $this->calculateDurationInsights($dutiesInRange);
+        $completedDutiesInRange = $dutiesInRange->filter(
+            fn (Duty $duty): bool => $duty->end_time->lte($completedRangeEnd)
+        )->values();
+        $durationInsights = $this->calculateDurationInsights($completedDutiesInRange);
 
         $periodDurationSeconds = max(1, $start->diffInSeconds($end));
         $previousEnd = $start->copy()->subSecond();
