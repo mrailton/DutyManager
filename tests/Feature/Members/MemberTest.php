@@ -110,4 +110,64 @@ class MemberTest extends TestCase
 
         $response->assertSessionHasErrors('clinical_level');
     }
+
+    #[Test]
+    public function aMemberCanBeUpdated(): void
+    {
+        $user = User::factory()->create();
+        $member = Member::factory()->create(['name' => 'Original Name', 'clinical_level' => 'CFR', 'driver' => false]);
+
+        $response = $this->actingAs($user)->put('/members/' . $member->id, [
+            'name' => 'Updated Name',
+            'clinical_level' => 'EMT',
+            'driver' => '1',
+        ]);
+
+        $response->assertRedirect('/members');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'name' => 'Updated Name',
+            'clinical_level' => 'EMT',
+            'driver' => 1,
+        ]);
+    }
+
+    #[Test]
+    public function aGuestCannotUpdateAMember(): void
+    {
+        $member = Member::factory()->create();
+
+        $response = $this->put('/members/' . $member->id, [
+            'name' => 'Hacked Name',
+            'clinical_level' => 'EMT',
+        ]);
+
+        $response->assertRedirect('/login');
+    }
+
+    #[Test]
+    public function theShowPageDisplaysMemberDetails(): void
+    {
+        $user = User::factory()->create();
+        $member = Member::factory()->create(['name' => 'Alice Smith']);
+        $duty = \App\Models\Duty::factory()->create(['name' => 'Weekend Shift']);
+        $member->duties()->attach($duty);
+
+        $response = $this->actingAs($user)->get('/members/' . $member->id);
+
+        $response->assertOk();
+        $response->assertSee('Alice Smith');
+        $response->assertSee('Weekend Shift');
+    }
+
+    #[Test]
+    public function aGuestCannotViewAMember(): void
+    {
+        $member = Member::factory()->create();
+
+        $response = $this->get('/members/' . $member->id);
+
+        $response->assertRedirect('/login');
+    }
 }

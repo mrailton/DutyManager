@@ -130,4 +130,66 @@ class VehicleTest extends TestCase
 
         $response->assertSessionHasErrors('role');
     }
+
+    #[Test]
+    public function aVehicleCanBeUpdated(): void
+    {
+        $user = User::factory()->create();
+        $vehicle = Vehicle::factory()->create(['callsign' => 'DUTY-1', 'name' => 'Original Name', 'role' => 'RA']);
+
+        $response = $this->actingAs($user)->put('/vehicles/' . $vehicle->id, [
+            'callsign' => 'DUTY-2',
+            'name' => 'Updated Name',
+            'role' => 'JEEP',
+        ]);
+
+        $response->assertRedirect('/vehicles');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
+        $this->assertDatabaseHas('vehicles', [
+            'id' => $vehicle->id,
+            'callsign' => 'DUTY-2',
+            'name' => 'Updated Name',
+            'role' => 'JEEP',
+        ]);
+    }
+
+    #[Test]
+    public function aGuestCannotUpdateAVehicle(): void
+    {
+        $vehicle = Vehicle::factory()->create();
+
+        $response = $this->put('/vehicles/' . $vehicle->id, [
+            'callsign' => 'HACKED-1',
+            'name' => 'Hacked Name',
+            'role' => 'RA',
+        ]);
+
+        $response->assertRedirect('/login');
+    }
+
+    #[Test]
+    public function theShowPageDisplaysVehicleDetails(): void
+    {
+        $user = User::factory()->create();
+        $vehicle = Vehicle::factory()->create(['callsign' => 'DUTY-5', 'name' => 'London Echo']);
+        $duty = \App\Models\Duty::factory()->create(['name' => 'Night Patrol']);
+        $vehicle->duties()->attach($duty);
+
+        $response = $this->actingAs($user)->get('/vehicles/' . $vehicle->id);
+
+        $response->assertOk();
+        $response->assertSee('DUTY-5');
+        $response->assertSee('London Echo');
+        $response->assertSee('Night Patrol');
+    }
+
+    #[Test]
+    public function aGuestCannotViewAVehicle(): void
+    {
+        $vehicle = Vehicle::factory()->create();
+
+        $response = $this->get('/vehicles/' . $vehicle->id);
+
+        $response->assertRedirect('/login');
+    }
 }

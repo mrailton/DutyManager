@@ -9,15 +9,15 @@ use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 
-class StoreVehicleController extends Controller
+class UpdateVehicleController extends Controller
 {
-    public function __invoke(StoreVehicleRequest $request): RedirectResponse
+    public function __invoke(StoreVehicleRequest $request, Vehicle $vehicle): RedirectResponse
     {
-        Vehicle::create($request->validated());
+        $vehicle->update($request->validated());
 
         return redirect()->route('vehicles.index')->with('flash', [
             'type' => 'success',
-            'message' => 'Vehicle created successfully.',
+            'message' => 'Vehicle updated successfully.',
         ]);
     }
 }

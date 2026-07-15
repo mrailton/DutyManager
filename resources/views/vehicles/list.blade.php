@@ -27,7 +27,7 @@
                                     <span class="badge {{ $vehicle->role->badgeClass() }}">{{ $vehicle->role->label() }}</span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+                                    <a href="{{ route('vehicles.show', $vehicle) }}" class="btn btn-ghost btn-sm">View</a>
                                 </td>
                             </tr>
                         @empty
@@ -80,4 +80,39 @@
             <button>close</button>
         </form>
     </dialog>
+
+    <div x-data="{ editItem: { id: null, callsign: '', name: '', role: '' } }">
+        <dialog x-ref="editModal" class="modal">
+            <div class="modal-box">
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                </form>
+                <h3 class="text-lg font-bold">Edit Vehicle</h3>
+                <form :action="`/vehicles/${editItem.id}`" method="POST" class="mt-4">
+                    @csrf
+                    @method('PUT')
+                    <label class="fieldset-label">Callsign</label>
+                    <input type="text" name="callsign" required class="input w-full" x-model="editItem.callsign" />
+
+                    <label class="fieldset-label mt-4">Name</label>
+                    <input type="text" name="name" required class="input w-full" x-model="editItem.name" />
+
+                    <label class="fieldset-label mt-4">Role</label>
+                    <select name="role" required class="select w-full" x-model="editItem.role">
+                        <option value="" disabled>Select role</option>
+                        @foreach (App\Enums\VehicleRole::cases() as $role)
+                            <option value="{{ $role->value }}">{{ $role->label() }}</option>
+                        @endforeach
+                    </select>
+
+                    <div class="modal-action">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
+    </div>
 </x-layout.app>

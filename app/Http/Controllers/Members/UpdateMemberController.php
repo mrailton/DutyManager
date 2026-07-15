@@ -9,15 +9,15 @@ use App\Http\Requests\StoreMemberRequest;
 use App\Models\Member;
 use Illuminate\Http\RedirectResponse;
 
-class StoreMemberController extends Controller
+class UpdateMemberController extends Controller
 {
-    public function __invoke(StoreMemberRequest $request): RedirectResponse
+    public function __invoke(StoreMemberRequest $request, Member $member): RedirectResponse
     {
-        Member::create($request->validated());
+        $member->update($request->validated());
 
         return redirect()->route('members.index')->with('flash', [
             'type' => 'success',
-            'message' => 'Member created successfully.',
+            'message' => 'Member updated successfully.',
         ]);
     }
 }
