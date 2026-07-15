@@ -21,11 +21,6 @@
                             <tr>
                                 <td>
                                     <div class="flex items-center gap-3">
-                                        <div class="avatar placeholder">
-                                            <div class="size-8 rounded-full bg-neutral text-neutral-content text-xs">
-                                                <span>{{ strtoupper(substr($user->name, 0, 2)) }}</span>
-                                            </div>
-                                        </div>
                                         <div class="font-medium">{{ $user->name }}</div>
                                     </div>
                                 </td>
