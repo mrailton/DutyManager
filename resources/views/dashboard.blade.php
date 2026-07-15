@@ -71,10 +71,26 @@
         @endif
 
         @if ($busiestVehicle)
-            <div class="card bg-base-100 shadow-sm sm:col-span-2 lg:col-span-3">
+            <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-sm">Most Used Vehicle</h2>
                     <p class="text-xl font-bold">{{ $busiestVehicle->callsign }} &mdash; {{ $busiestVehicle->name }} <span class="text-base font-normal text-base-content/60">({{ $busiestVehicle->duties_count }} duties)</span></p>
+                </div>
+            </div>
+        @endif
+
+        @if ($busiestMembers->isNotEmpty())
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-sm">Top 5 Busiest Members</h2>
+                    <ol class="list-decimal list-inside space-y-1">
+                        @foreach ($busiestMembers as $member)
+                            <li class="text-sm">
+                                <a href="{{ route('members.show', $member) }}" class="link font-medium">{{ $member->name }}</a>
+                                <span class="text-base-content/60">({{ $member->duties_count }} duties)</span>
+                            </li>
+                        @endforeach
+                    </ol>
                 </div>
             </div>
         @endif

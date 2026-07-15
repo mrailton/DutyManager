@@ -67,6 +67,16 @@ class DashboardController extends Controller
             ->orderByDesc('duties_count')
             ->first();
 
+        $busiestMembers = Member::select('members.*')
+            ->selectRaw('COUNT(duty_members.duty_id) as duties_count')
+            ->leftJoin('duty_members', 'members.id', '=', 'duty_members.member_id')
+            ->leftJoin('duties', 'duty_members.duty_id', '=', 'duties.id')
+            ->whereBetween('duties.start_time', [$start, $end])
+            ->groupBy('members.id')
+            ->orderByDesc('duties_count')
+            ->limit(5)
+            ->get();
+
         $busiestMonth = $totalDuties > 0
             ? Carbon::parse($dutiesInRange->groupBy(fn (Duty $d) => $d->start_time->format('Y-m'))
                 ->sortDesc()
@@ -84,6 +94,7 @@ class DashboardController extends Controller
             'totalMembers' => $totalMembers,
             'totalVehicles' => $totalVehicles,
             'busiestVehicle' => $busiestVehicle,
+            'busiestMembers' => $busiestMembers,
             'busiestMonth' => $busiestMonth,
         ]);
     }
