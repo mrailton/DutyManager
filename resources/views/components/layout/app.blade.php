@@ -94,8 +94,8 @@
                         <img src="{{ Auth::user()->gravatar }}" alt="" class="size-10 rounded-full outline -outline-offset-1 outline-black/5 dark:outline-white/10" />
                     </div>
                     <div class="ml-3">
-                        <div class="text-base font-medium text-gray-800 dark:text-white">{{ Auth()->user()->name }}</div>
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ Auth()->user()->email }}</div>
+                        <div class="text-base font-medium text-gray-800 dark:text-white">{{ Auth::user()->name }}</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
                 <div class="mt-3 space-y-1">
