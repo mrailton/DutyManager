@@ -12,6 +12,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Clinical Level</th>
+                            <th>Driver</th>
                             <th class="w-20"></th>
                         </tr>
                     </thead>
@@ -29,12 +30,19 @@
                                     <span class="badge {{ $member->clinical_level->badgeClass() }}">{{ $member->clinical_level->label() }}</span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+                                    @if($member->driver)
+                                        <span class="badge badge-success">Driver</span>
+                                    @else
+                                        <span class="badge badge-warning">Non-Driver</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-ghost btn-sm">View</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center py-8 text-base-content/60">
+                                <td colspan="4" class="text-center py-8 text-base-content/60">
                                     No members found.
                                 </td>
                             </tr>
@@ -69,6 +77,11 @@
                         <option value="{{ $level->value }}">{{ $level->label() }}</option>
                     @endforeach
                 </select>
+
+                <div class="mt-4 flex items-center gap-2">
+                    <input type="checkbox" name="driver" value="1" class="checkbox" id="driver-checkbox" />
+                    <label for="driver-checkbox" class="fieldset-label">Driver</label>
+                </div>
 
                 <div class="modal-action">
                     <button type="submit" class="btn btn-primary">Create Member</button>

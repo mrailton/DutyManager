@@ -14,12 +14,13 @@ class Member extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['name', 'clinical_level'];
+    protected $fillable = ['name', 'clinical_level', 'driver'];
 
     protected function casts(): array
     {
         return [
             'clinical_level' => ClinicalLevel::class,
+            'driver' => 'boolean',
         ];
     }
 }

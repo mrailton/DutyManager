@@ -14,6 +14,7 @@ class MemberFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'clinical_level' => $this->faker->randomElement(ClinicalLevel::cases()),
+            'driver' => $this->faker->boolean(),
         ];
     }
 }

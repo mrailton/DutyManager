@@ -17,7 +17,10 @@ class StoreMemberController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'clinical_level' => ['required', 'string', 'in:' . implode(',', array_map(fn ($case) => $case->value, ClinicalLevel::cases()))],
+            'driver' => ['boolean'],
         ]);
+
+        $data['driver'] = $request->boolean('driver');
 
         Member::create($data);
 
