@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ProcessLogoutController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\SendPasswordResetLinkController;
 use App\Http\Controllers\Auth\ShowLoginController;
 use App\Http\Controllers\Auth\StoreLoginController;
+use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Duties\ListDutiesController;
 use App\Http\Controllers\Duties\StoreDutyController;
@@ -50,4 +54,9 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', ShowLoginController::class)->name('login');
     Route::post('/login', StoreLoginController::class)->name('login.store');
+
+    Route::get('/forgot-password', ForgotPasswordController::class)->name('password.request');
+    Route::post('/forgot-password', SendPasswordResetLinkController::class)->name('password.email');
+    Route::get('/reset-password/{token}', ResetPasswordController::class)->name('password.reset');
+    Route::post('/reset-password', UpdatePasswordController::class)->name('password.update');
 });
