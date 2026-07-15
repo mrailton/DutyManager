@@ -206,8 +206,8 @@ class DashboardTest extends TestCase
         $this->travelTo(Carbon::parse('2026-07-15 12:00:00'));
 
         $user = User::factory()->create();
-        $memberCompleted = Member::factory()->create();
-        $memberFuture = Member::factory()->create();
+        $memberCompleted = Member::factory()->create(['clinical_level' => 'EMT']);
+        $memberFuture = Member::factory()->create(['clinical_level' => 'CFR']);
 
         $completedDutyOne = Duty::factory()->create([
             'start_time' => Carbon::parse('2026-07-10 08:00:00'),
@@ -239,6 +239,9 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
 
         $response->assertViewHas('totalVolunteerHours', 3);
+        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => 1 === count($rows)
+                && 'EMT' === $rows[0]['level']
+                && 3 === $rows[0]['hours']);
         $response->assertViewHas('durationInsights', fn (array $insights): bool => 1.5 === $insights['average_hours']
                 && '1h 30m' === $insights['average_label']
                 && '2h 0m' === $insights['longest']['duration_label']
