@@ -18,6 +18,12 @@ use App\Http\Controllers\Members\ListMembersController;
 use App\Http\Controllers\Members\StoreMemberController;
 use App\Http\Controllers\Members\UpdateMemberController;
 use App\Http\Controllers\Members\ViewMemberController;
+use App\Http\Controllers\Users\DeleteUserController;
+use App\Http\Controllers\Users\ListUsersController;
+use App\Http\Controllers\Users\ReactivateUserController;
+use App\Http\Controllers\Users\StoreUserController;
+use App\Http\Controllers\Users\UpdateUserController;
+use App\Http\Controllers\Users\ViewUserController;
 use App\Http\Controllers\Vehicles\ListVehiclesController;
 use App\Http\Controllers\Vehicles\StoreVehicleController;
 use App\Http\Controllers\Vehicles\UpdateVehicleController;
@@ -46,6 +52,15 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/', StoreDutyController::class)->name('store');
         Route::get('/{duty}', ViewDutyController::class)->name('show');
         Route::put('/{duty}', UpdateDutyController::class)->name('update');
+    });
+
+    Route::prefix('users')->as('users.')->group(function (): void {
+        Route::get('/', ListUsersController::class)->name('index');
+        Route::post('/', StoreUserController::class)->name('store');
+        Route::get('/{user}', ViewUserController::class)->name('show');
+        Route::put('/{user}', UpdateUserController::class)->name('update');
+        Route::delete('/{user}', DeleteUserController::class)->name('delete');
+        Route::post('/{user}/reactivate', ReactivateUserController::class)->name('reactivate')->withTrashed();
     });
 
     Route::post('/logout', ProcessLogoutController::class)->name('logout');

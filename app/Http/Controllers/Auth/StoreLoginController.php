@@ -26,6 +26,8 @@ class StoreLoginController extends Controller
 
         $request->session()->regenerate();
 
+        Auth::user()->update(['last_login_at' => now()]);
+
         return redirect()->intended('/')->with('success', 'You have been logged in.');
     }
 }

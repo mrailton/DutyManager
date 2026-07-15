@@ -34,7 +34,7 @@ class UpdatePasswordController extends Controller
         );
 
         return Password::PASSWORD_RESET === $status
-            ? redirect()->route('login')->with('status', __($status))
+            ? redirect()->route('login')->with('flash', ['type' => 'success', 'message' => __($status)])
             : back()->withErrors(['email' => __($status)]);
     }
 }

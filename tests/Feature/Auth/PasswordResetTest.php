@@ -97,7 +97,7 @@ class PasswordResetTest extends TestCase
         ]);
 
         $response->assertRedirect('/login');
-        $response->assertSessionHas('status');
+        $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
     }
 
     #[Test]
