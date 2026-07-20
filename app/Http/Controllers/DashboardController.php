@@ -79,6 +79,7 @@ class DashboardController extends Controller
             ->orderByDesc('duties_count')
             ->limit(5)
             ->get();
+
         $busiestMembers->load(['duties' => function ($query) use ($start, $end, $completedRangeEnd): void {
             $query
                 ->whereBetween('start_time', [$start, $end])
@@ -86,12 +87,24 @@ class DashboardController extends Controller
                 ->select(['duties.id', 'start_time', 'end_time']);
         }]);
 
+
         $busiestMembers->each(function (Member $member): void {
-            $assignedHours = $member->duties->sum(
-                fn (Duty $duty): float => $duty->start_time->diffInMinutes($duty->end_time, true) / 60
+            $assignedMinutes = $member->duties->sum(
+                fn (Duty $duty): float => $duty->start_time->diffInMinutes($duty->end_time, true)
             );
-            $member->setAttribute('assigned_hours', round($assignedHours, 1));
+
+            $hours = floor($assignedMinutes / 60);
+            $minutes = $assignedMinutes % 60;
+
+            $formatted = collect([
+                $hours > 0 ? "{$hours} hour" . ($hours !== 1 ? 's' : '') : null,
+                $minutes > 0 ? "{$minutes} min" . ($minutes !== 1 ? 's' : '') : null,
+            ])->filter()->implode(' ');
+
+
+            $member->setAttribute('assigned_hours', $formatted);
         });
+
 
         $upcomingUncoveredDuties = Duty::query()
             ->where('covered', false)

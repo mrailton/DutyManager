@@ -88,7 +88,7 @@
                         @foreach ($busiestMembers as $member)
                             <li class="text-sm">
                                 <a href="{{ route('members.show', $member) }}" class="link font-medium">{{ $member->name }}</a>
-                                <span class="text-base-content/60">({{ $member->duties_count }} duties, {{ number_format($member->assigned_hours, 1) }}h)</span>
+                                <span class="text-base-content/60">({{ $member->duties_count }} duties, {{ $member->assigned_hours }})</span>
                             </li>
                         @endforeach
                     </ol>

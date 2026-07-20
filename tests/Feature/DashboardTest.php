@@ -197,7 +197,7 @@ class DashboardTest extends TestCase
         $response->assertViewHas('busiestMembers');
         $this->assertCount(5, $response->viewData('busiestMembers'));
         $this->assertEquals($busyMember->id, $response->viewData('busiestMembers')->first()->id);
-        $this->assertEquals(8.0, $response->viewData('busiestMembers')->first()->assigned_hours);
+        $this->assertEquals('8 hours', $response->viewData('busiestMembers')->first()->assigned_hours);
     }
 
     #[Test]
@@ -249,7 +249,7 @@ class DashboardTest extends TestCase
         $response->assertViewHas('busiestMembers');
         $this->assertEquals($memberCompleted->id, $response->viewData('busiestMembers')->first()->id);
         $this->assertEquals(2, $response->viewData('busiestMembers')->first()->duties_count);
-        $this->assertEquals(3.0, $response->viewData('busiestMembers')->first()->assigned_hours);
+        $this->assertEquals('3 hours', $response->viewData('busiestMembers')->first()->assigned_hours);
 
         $this->travelBack();
     }
