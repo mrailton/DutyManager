@@ -97,8 +97,8 @@ class DashboardController extends Controller
             $minutes = $assignedMinutes % 60;
 
             $formatted = collect([
-                $hours > 0 ? "{$hours} hour" . ($hours !== 1 ? 's' : '') : null,
-                $minutes > 0 ? "{$minutes} min" . ($minutes !== 1 ? 's' : '') : null,
+                $hours > 0 ? "{$hours} hour" . (1 !== $hours ? 's' : '') : null,
+                $minutes > 0 ? "{$minutes} min" . (1 !== $minutes ? 's' : '') : null,
             ])->filter()->implode(' ');
 
 
