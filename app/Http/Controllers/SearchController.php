@@ -28,7 +28,7 @@ class SearchController extends Controller
         $duties = Duty::query()
             ->where('name', 'like', "%{$query}%")
             ->orWhere('organiser', 'like', "%{$query}%")
-            ->orderBy('start_time', 'desc')
+            ->latest('start_time')
             ->limit(5)
             ->get();
 
