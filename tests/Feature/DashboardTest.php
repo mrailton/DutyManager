@@ -81,7 +81,7 @@ class DashboardTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/?start_date='.now()->format('Y-m-d').'&end_date='.now()->subYear()->format('Y-m-d'));
+        $response = $this->actingAs($user)->get('/?start_date=' . now()->format('Y-m-d') . '&end_date=' . now()->subYear()->format('Y-m-d'));
 
         $response->assertOk();
     }
@@ -148,7 +148,7 @@ class DashboardTest extends TestCase
         $response->assertViewHas('uncoveredUpcomingDuties', 0);
         $response->assertViewHas('upcomingUncoveredDuties', fn ($duties) => $duties->isEmpty());
         $response->assertViewHas('assignedHoursByClinicalLevel', []);
-        $response->assertViewHas('durationInsights', fn (array $insights) => $insights['average_hours'] === 0.0);
+        $response->assertViewHas('durationInsights', fn (array $insights) => 0.0 === $insights['average_hours']);
         $response->assertViewHas('periodChanges');
     }
 
@@ -239,13 +239,13 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-31');
 
         $response->assertViewHas('totalVolunteerHours', 3);
-        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => count($rows) === 1
-                && $rows[0]['level'] === 'EMT'
-                && $rows[0]['hours'] === 3);
-        $response->assertViewHas('durationInsights', fn (array $insights): bool => $insights['average_hours'] === 1.5
-                && $insights['average_label'] === '1h 30m'
-                && $insights['longest']['duration_label'] === '2h 0m'
-                && $insights['shortest']['duration_label'] === '1h 0m');
+        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => 1 === count($rows)
+                && 'EMT' === $rows[0]['level']
+                && 3 === $rows[0]['hours']);
+        $response->assertViewHas('durationInsights', fn (array $insights): bool => 1.5 === $insights['average_hours']
+                && '1h 30m' === $insights['average_label']
+                && '2h 0m' === $insights['longest']['duration_label']
+                && '1h 0m' === $insights['shortest']['duration_label']);
         $response->assertViewHas('busiestMembers');
         $this->assertEquals($memberCompleted->id, $response->viewData('busiestMembers')->first()->id);
         $this->assertEquals(2, $response->viewData('busiestMembers')->first()->duties_count);
@@ -359,20 +359,20 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-15');
 
         $response->assertViewHas('uncoveredUpcomingDuties', 2);
-        $response->assertViewHas('upcomingUncoveredDuties', fn ($duties): bool => $duties->count() === 2);
+        $response->assertViewHas('upcomingUncoveredDuties', fn ($duties): bool => 2 === $duties->count());
         $response->assertSee('Uncovered Upcoming Duties (30 Days)');
         $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-16')->firstOrFail()));
         $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-18')->firstOrFail()));
-        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => $rows[0]['level'] === 'EMT'
-                && $rows[0]['hours'] === 14
-                && $rows[1]['level'] === 'CFR'
-                && $rows[1]['hours'] === 4);
-        $response->assertViewHas('durationInsights', fn (array $insights): bool => $insights['average_hours'] === 3.5
-                && $insights['longest']['hours'] === 4.0
-                && $insights['shortest']['hours'] === 2.0);
-        $response->assertViewHas('periodChanges', fn (array $changes): bool => $changes['duties'] === 300.0
-                && $changes['volunteer_hours'] === 800.0
-                && $changes['average_members_per_duty'] === 0.0);
+        $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => 'EMT' === $rows[0]['level']
+                && 14 === $rows[0]['hours']
+                && 'CFR' === $rows[1]['level']
+                && 4 === $rows[1]['hours']);
+        $response->assertViewHas('durationInsights', fn (array $insights): bool => 3.5 === $insights['average_hours']
+                && 4.0 === $insights['longest']['hours']
+                && 2.0 === $insights['shortest']['hours']);
+        $response->assertViewHas('periodChanges', fn (array $changes): bool => 300.0 === $changes['duties']
+                && 800.0 === $changes['volunteer_hours']
+                && 0.0 === $changes['average_members_per_duty']);
 
         $this->travelBack();
     }

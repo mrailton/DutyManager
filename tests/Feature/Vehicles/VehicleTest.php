@@ -138,7 +138,7 @@ class VehicleTest extends TestCase
         $user = User::factory()->create();
         $vehicle = Vehicle::factory()->create(['callsign' => 'DUTY-1', 'name' => 'Original Name', 'role' => 'RA']);
 
-        $response = $this->actingAs($user)->put('/vehicles/'.$vehicle->id, [
+        $response = $this->actingAs($user)->put('/vehicles/' . $vehicle->id, [
             'callsign' => 'DUTY-2',
             'name' => 'Updated Name',
             'role' => 'JEEP',
@@ -159,7 +159,7 @@ class VehicleTest extends TestCase
     {
         $vehicle = Vehicle::factory()->create();
 
-        $response = $this->put('/vehicles/'.$vehicle->id, [
+        $response = $this->put('/vehicles/' . $vehicle->id, [
             'callsign' => 'HACKED-1',
             'name' => 'Hacked Name',
             'role' => 'RA',
@@ -176,7 +176,7 @@ class VehicleTest extends TestCase
         $duty = Duty::factory()->create(['name' => 'Night Patrol']);
         $vehicle->duties()->attach($duty);
 
-        $response = $this->actingAs($user)->get('/vehicles/'.$vehicle->id);
+        $response = $this->actingAs($user)->get('/vehicles/' . $vehicle->id);
 
         $response->assertOk();
         $response->assertSee('DUTY-5');
@@ -189,7 +189,7 @@ class VehicleTest extends TestCase
     {
         $vehicle = Vehicle::factory()->create();
 
-        $response = $this->get('/vehicles/'.$vehicle->id);
+        $response = $this->get('/vehicles/' . $vehicle->id);
 
         $response->assertRedirect('/login');
     }
