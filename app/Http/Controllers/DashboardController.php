@@ -106,7 +106,7 @@ class DashboardController extends Controller
         $upcomingDutiesInNext30Days = Duty::query()
             ->whereBetween('start_time', [$now, $upcomingWindowEnd])
             ->orderBy('start_time')
-            ->get(['id', 'name', 'start_time', 'covered']);
+            ->get(['id', 'name', 'start_time', 'covered', 'confirmed']);
         $upcomingUncoveredDuties = $upcomingDutiesInNext30Days
             ->where('covered', false)
             ->values();

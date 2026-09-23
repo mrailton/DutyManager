@@ -149,7 +149,7 @@
                             <li class="text-sm">
                                 <a href="{{ route('duties.show', $duty) }}" class="link font-medium">{{ $duty->name }}</a>
                                 <span class="text-base-content/60">
-                                    ({{ $duty->start_time->format('j M Y, H:i') }} &middot; {{ $duty->covered ? 'Covered' : 'Uncovered' }})
+                                    ({{ $duty->start_time->format('j M Y, H:i') }} &middot; {{ $duty->covered ? 'Covered' : 'Not Covered' }} &middot; {{ $duty->confirmed ? 'Confirmed' : 'Not Confirmed' }})
                                 </span>
                             </li>
                         @endforeach
