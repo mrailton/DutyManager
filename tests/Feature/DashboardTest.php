@@ -56,9 +56,9 @@ class DashboardTest extends TestCase
         $response->assertSee('Active Members');
         $response->assertSee('Total Vehicles');
         $response->assertSee('Uncovered Upcoming Duties (30 Days)');
+        $response->assertSee('Upcoming Duties (30 Days)');
         $response->assertSee('Assigned Hours by Clinical Level');
         $response->assertSee('Duty Duration Insights');
-        $response->assertSee('Period-over-Period Change');
     }
 
     #[Test]
@@ -145,11 +145,10 @@ class DashboardTest extends TestCase
         $response->assertViewHas('averageMembersPerDuty', 0);
         $response->assertViewHas('averageDutiesPerMember', 0);
         $response->assertViewHas('busiestVehicle');
-        $response->assertViewHas('uncoveredUpcomingDuties', 0);
         $response->assertViewHas('upcomingUncoveredDuties', fn ($duties) => $duties->isEmpty());
+        $response->assertViewHas('upcomingDutiesInNext30Days', fn ($duties) => $duties->isEmpty());
         $response->assertViewHas('assignedHoursByClinicalLevel', []);
         $response->assertViewHas('durationInsights', fn (array $insights) => 0.0 === $insights['average_hours']);
-        $response->assertViewHas('periodChanges');
     }
 
     #[Test]
@@ -341,16 +340,19 @@ class DashboardTest extends TestCase
         $dutyD->vehicles()->attach([$vehicleOne->id]);
 
         Duty::factory()->create([
+            'name' => 'Upcoming Uncovered One',
             'start_time' => Carbon::parse('2026-07-16 09:00:00'),
             'end_time' => Carbon::parse('2026-07-16 11:00:00'),
             'covered' => false,
         ]);
         Duty::factory()->create([
+            'name' => 'Upcoming Uncovered Two',
             'start_time' => Carbon::parse('2026-07-18 09:00:00'),
             'end_time' => Carbon::parse('2026-07-18 11:00:00'),
             'covered' => false,
         ]);
         Duty::factory()->create([
+            'name' => 'Upcoming Covered',
             'start_time' => Carbon::parse('2026-07-19 09:00:00'),
             'end_time' => Carbon::parse('2026-07-19 11:00:00'),
             'covered' => true,
@@ -358,9 +360,12 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get('/?start_date=2026-07-01&end_date=2026-07-15');
 
-        $response->assertViewHas('uncoveredUpcomingDuties', 2);
         $response->assertViewHas('upcomingUncoveredDuties', fn ($duties): bool => 2 === $duties->count());
+        $response->assertViewHas('upcomingDutiesInNext30Days', fn ($duties): bool => 3 === $duties->count()
+                && $duties->contains('name', 'Upcoming Uncovered One')
+                && $duties->contains('name', 'Upcoming Covered'));
         $response->assertSee('Uncovered Upcoming Duties (30 Days)');
+        $response->assertSee('Upcoming Duties (30 Days)');
         $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-16')->firstOrFail()));
         $response->assertSee(route('duties.show', Duty::where('covered', false)->whereDate('start_time', '2026-07-18')->firstOrFail()));
         $response->assertViewHas('assignedHoursByClinicalLevel', fn (array $rows): bool => 'EMT' === $rows[0]['level']
@@ -370,10 +375,6 @@ class DashboardTest extends TestCase
         $response->assertViewHas('durationInsights', fn (array $insights): bool => 3.5 === $insights['average_hours']
                 && 4.0 === $insights['longest']['hours']
                 && 2.0 === $insights['shortest']['hours']);
-        $response->assertViewHas('periodChanges', fn (array $changes): bool => 300.0 === $changes['duties']
-                && 800.0 === $changes['volunteer_hours']
-                && 0.0 === $changes['average_members_per_duty']);
-
         $this->travelBack();
     }
 }

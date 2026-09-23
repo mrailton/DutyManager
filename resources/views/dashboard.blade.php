@@ -95,13 +95,31 @@
                 </div>
             </div>
         @endif
+
+        <div class="card bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-sm">Assigned Hours by Clinical Level</h2>
+                @if ($assignedHoursByClinicalLevel === [])
+                    <p class="text-sm text-base-content/60">No assigned hours in this period.</p>
+                @else
+                    <ul class="space-y-2">
+                        @foreach ($assignedHoursByClinicalLevel as $metric)
+                            <li class="flex items-center justify-between text-sm">
+                                <span>{{ $metric['level'] }}</span>
+                                <span class="font-medium">{{ number_format($metric['hours']) }}h</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div class="card bg-base-100 shadow-sm">
             <div class="card-body">
                 <h2 class="card-title text-sm">Uncovered Upcoming Duties (30 Days)</h2>
-                <p class="text-3xl font-bold">{{ number_format($uncoveredUpcomingDuties) }}</p>
+                <p class="text-3xl font-bold">{{ number_format($upcomingUncoveredDuties->count()) }}</p>
 
                 @if ($upcomingUncoveredDuties->isEmpty())
                     <p class="mt-2 text-sm text-base-content/60">No uncovered upcoming duties.</p>
@@ -111,6 +129,28 @@
                             <li class="text-sm">
                                 <a href="{{ route('duties.show', $duty) }}" class="link font-medium">{{ $duty->name }}</a>
                                 <span class="text-base-content/60">({{ $duty->start_time->format('j M Y, H:i') }})</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-sm">Upcoming Duties (30 Days)</h2>
+                <p class="text-3xl font-bold">{{ number_format($upcomingDutiesInNext30Days->count()) }}</p>
+
+                @if ($upcomingDutiesInNext30Days->isEmpty())
+                    <p class="mt-2 text-sm text-base-content/60">No upcoming duties.</p>
+                @else
+                    <ul class="mt-2 space-y-1">
+                        @foreach ($upcomingDutiesInNext30Days as $duty)
+                            <li class="text-sm">
+                                <a href="{{ route('duties.show', $duty) }}" class="link font-medium">{{ $duty->name }}</a>
+                                <span class="text-base-content/60">
+                                    ({{ $duty->start_time->format('j M Y, H:i') }} &middot; {{ $duty->covered ? 'Covered' : 'Uncovered' }})
+                                </span>
                             </li>
                         @endforeach
                     </ul>
@@ -151,53 +191,6 @@
                 </dl>
             </div>
         </div>
-
     </div>
 
-    <div class="mt-4">
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title text-sm">Assigned Hours by Clinical Level</h2>
-                @if ($assignedHoursByClinicalLevel === [])
-                    <p class="text-sm text-base-content/60">No assigned hours in this period.</p>
-                @else
-                    <ul class="space-y-2">
-                        @foreach ($assignedHoursByClinicalLevel as $metric)
-                            <li class="flex items-center justify-between text-sm">
-                                <span>{{ $metric['level'] }}</span>
-                                <span class="font-medium">{{ number_format($metric['hours']) }}h</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <div class="card bg-base-100 shadow-sm mt-4">
-        <div class="card-body">
-            <h2 class="card-title text-sm">Period-over-Period Change</h2>
-            <p class="text-sm text-base-content/60">Compared to the immediately preceding period of the same length</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-                <div class="rounded-lg bg-base-200 p-3">
-                    <div class="text-xs text-base-content/60">Duties</div>
-                    <div class="text-xl font-bold @class(['text-success' => $periodChanges['duties'] > 0, 'text-error' => $periodChanges['duties'] < 0])">
-                        {{ $periodChanges['duties'] > 0 ? '+' : '' }}{{ number_format($periodChanges['duties'], 1) }}%
-                    </div>
-                </div>
-                <div class="rounded-lg bg-base-200 p-3">
-                    <div class="text-xs text-base-content/60">Volunteer Hours</div>
-                    <div class="text-xl font-bold @class(['text-success' => $periodChanges['volunteer_hours'] > 0, 'text-error' => $periodChanges['volunteer_hours'] < 0])">
-                        {{ $periodChanges['volunteer_hours'] > 0 ? '+' : '' }}{{ number_format($periodChanges['volunteer_hours'], 1) }}%
-                    </div>
-                </div>
-                <div class="rounded-lg bg-base-200 p-3">
-                    <div class="text-xs text-base-content/60">Avg Members / Duty</div>
-                    <div class="text-xl font-bold @class(['text-success' => $periodChanges['average_members_per_duty'] > 0, 'text-error' => $periodChanges['average_members_per_duty'] < 0])">
-                        {{ $periodChanges['average_members_per_duty'] > 0 ? '+' : '' }}{{ number_format($periodChanges['average_members_per_duty'], 1) }}%
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </x-layout.app>

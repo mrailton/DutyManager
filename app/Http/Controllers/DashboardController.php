@@ -12,7 +12,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -33,6 +32,7 @@ class DashboardController extends Controller
         $start = $startDate->copy()->startOfDay();
         $end = $endDate->copy()->endOfDay();
         $completedRangeEnd = $end->copy()->gt($now) ? $now->copy() : $end->copy();
+        $upcomingWindowEnd = $now->copy()->addDays(30);
 
         $dutiesInRange = Duty::query()
             ->whereBetween('start_time', [$start, $end])
@@ -49,10 +49,7 @@ class DashboardController extends Controller
         $averageMembersPerDuty = $currentSummary['average_members_per_duty'];
 
         $totalMembers = Member::count();
-        $totalMemberAssignments = DB::table('duty_members')
-            ->join('duties', 'duty_members.duty_id', '=', 'duties.id')
-            ->whereBetween('duties.start_time', [$start, $end])
-            ->count();
+        $totalMemberAssignments = $dutiesInRange->sum('members_count');
 
         $averageDutiesPerMember = $totalMembers > 0
             ? round($totalMemberAssignments / $totalMembers)
@@ -60,7 +57,7 @@ class DashboardController extends Controller
 
         $totalVehicles = Vehicle::count();
 
-        $busiestVehicle = Vehicle::select('vehicles.*')
+        $busiestVehicle = Vehicle::select(['vehicles.id', 'vehicles.callsign', 'vehicles.name'])
             ->selectRaw('COUNT(duty_vehicles.duty_id) as duties_count')
             ->leftJoin('duty_vehicles', 'vehicles.id', '=', 'duty_vehicles.vehicle_id')
             ->leftJoin('duties', 'duty_vehicles.duty_id', '=', 'duties.id')
@@ -69,7 +66,7 @@ class DashboardController extends Controller
             ->orderByDesc('duties_count')
             ->first();
 
-        $busiestMembers = Member::select('members.*')
+        $busiestMembers = Member::select(['members.id', 'members.name'])
             ->selectRaw('COUNT(duty_members.duty_id) as duties_count')
             ->leftJoin('duty_members', 'members.id', '=', 'duty_members.member_id')
             ->leftJoin('duties', 'duty_members.duty_id', '=', 'duties.id')
@@ -106,38 +103,19 @@ class DashboardController extends Controller
         });
 
 
-        $upcomingUncoveredDuties = Duty::query()
-            ->where('covered', false)
-            ->whereBetween('start_time', [$now, $now->copy()->addDays(30)])
+        $upcomingDutiesInNext30Days = Duty::query()
+            ->whereBetween('start_time', [$now, $upcomingWindowEnd])
             ->orderBy('start_time')
-            ->get(['id', 'name', 'start_time']);
-        $uncoveredUpcomingDuties = $upcomingUncoveredDuties->count();
+            ->get(['id', 'name', 'start_time', 'covered']);
+        $upcomingUncoveredDuties = $upcomingDutiesInNext30Days
+            ->where('covered', false)
+            ->values();
 
         $completedDutiesInRange = $dutiesInRange->filter(
             fn (Duty $duty): bool => $duty->end_time->lte($completedRangeEnd)
         )->values();
         $assignedHoursByClinicalLevel = $this->calculateAssignedHoursByClinicalLevel($completedDutiesInRange);
         $durationInsights = $this->calculateDurationInsights($completedDutiesInRange);
-
-        $periodDurationSeconds = max(1, $start->diffInSeconds($end));
-        $previousEnd = $start->copy()->subSecond();
-        $previousStart = $previousEnd->copy()->subSeconds($periodDurationSeconds);
-        $previousSummary = $this->buildSummaryForRange($previousStart, $previousEnd, $now);
-
-        $periodChanges = [
-            'duties' => $this->calculatePercentChange(
-                $currentSummary['total_duties'],
-                $previousSummary['total_duties']
-            ),
-            'volunteer_hours' => $this->calculatePercentChange(
-                $currentSummary['total_volunteer_hours'],
-                $previousSummary['total_volunteer_hours']
-            ),
-            'average_members_per_duty' => $this->calculatePercentChange(
-                $currentSummary['average_members_per_duty'],
-                $previousSummary['average_members_per_duty']
-            ),
-        ];
 
         $busiestMonth = null;
 
@@ -160,11 +138,10 @@ class DashboardController extends Controller
             'busiestVehicle' => $busiestVehicle,
             'busiestMembers' => $busiestMembers,
             'busiestMonth' => $busiestMonth,
-            'uncoveredUpcomingDuties' => $uncoveredUpcomingDuties,
             'upcomingUncoveredDuties' => $upcomingUncoveredDuties,
+            'upcomingDutiesInNext30Days' => $upcomingDutiesInNext30Days,
             'assignedHoursByClinicalLevel' => $assignedHoursByClinicalLevel,
             'durationInsights' => $durationInsights,
-            'periodChanges' => $periodChanges,
         ]);
     }
 
@@ -202,42 +179,6 @@ class DashboardController extends Controller
             'total_volunteer_hours' => $totalCompletedVolunteerHours,
             'average_members_per_duty' => $totalDuties > 0 ? round($totalMembersAcrossDuties / $totalDuties) : 0,
             'duties_by_month' => $dutiesByMonth,
-        ];
-    }
-
-    /**
-     * @return array{
-     *   total_duties:int,
-     *   total_volunteer_hours:int,
-     *   average_members_per_duty:float|int
-     * }
-     */
-    private function buildSummaryForRange(Carbon $start, Carbon $end, Carbon $completionCutoff): array
-    {
-        $totalCompletedVolunteerHours = 0;
-        $totalMembersAcrossDuties = 0;
-        $totalDuties = 0;
-
-        foreach (
-            Duty::query()
-                ->whereBetween('start_time', [$start, $end])
-                ->select(['id', 'start_time', 'end_time', 'covered'])
-                ->withCount('members')
-                ->cursor() as $duty
-        ) {
-            ++$totalDuties;
-            $durationHours = $duty->start_time->diffInMinutes($duty->end_time, true) / 60;
-            $totalMembersAcrossDuties += $duty->members_count;
-
-            if ($duty->end_time->lte($completionCutoff)) {
-                $totalCompletedVolunteerHours += (int) round($duty->members_count * $durationHours);
-            }
-        }
-
-        return [
-            'total_duties' => $totalDuties,
-            'total_volunteer_hours' => $totalCompletedVolunteerHours,
-            'average_members_per_duty' => $totalDuties > 0 ? round($totalMembersAcrossDuties / $totalDuties) : 0,
         ];
     }
 
@@ -324,12 +265,4 @@ class DashboardController extends Controller
         return "{$wholeHours}h {$minutes}m";
     }
 
-    private function calculatePercentChange(int|float $current, int|float $previous): float
-    {
-        if (0.0 === (float) $previous) {
-            return 0.0 === (float) $current ? 0.0 : 100.0;
-        }
-
-        return round((($current - $previous) / $previous) * 100, 1);
-    }
 }
