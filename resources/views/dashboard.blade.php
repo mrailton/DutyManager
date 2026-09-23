@@ -31,7 +31,7 @@
         <div class="stat bg-gradient-to-br from-secondary to-secondary/80 text-secondary-content rounded-box shadow-sm">
             <div class="stat-title text-secondary-content/80">Volunteer Hours</div>
             <div class="stat-value">{{ number_format($totalVolunteerHours) }}</div>
-            <div class="stat-desc text-secondary-content/60">Total across all duties</div>
+            <div class="stat-desc text-secondary-content/60">Total across all completed duties</div>
         </div>
 
         <div class="stat bg-gradient-to-br from-accent to-accent/80 text-accent-content rounded-box shadow-sm">
