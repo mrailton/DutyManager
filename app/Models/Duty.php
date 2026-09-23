@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['name', 'organiser', 'start_time', 'end_time', 'covered', 'notes'])]
+#[Fillable(['name', 'organiser', 'start_time', 'end_time', 'covered', 'notes', 'confirmed'])]
 class Duty extends Model
 {
     use HasFactory;
@@ -30,6 +30,7 @@ class Duty extends Model
             'start_time' => 'datetime',
             'end_time' => 'datetime',
             'covered' => 'boolean',
+            'confirmed' => 'boolean',
         ];
     }
 }

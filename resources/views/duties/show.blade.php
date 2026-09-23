@@ -15,7 +15,7 @@
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title">Details</h2>
-                    <dl class="grid grid-cols-2 gap-4">
+                    <dl class="grid grid-cols-3 gap-4">
                         <div>
                             <dt class="text-sm text-base-content/60">Organiser</dt>
                             <dd class="font-medium">{{ $duty->organiser }}</dd>
@@ -24,6 +24,16 @@
                             <dt class="text-sm text-base-content/60">Covered</dt>
                             <dd>
                                 @if ($duty->covered)
+                                    <span class="badge badge-soft badge-success">Yes</span>
+                                @else
+                                    <span class="badge badge-soft">No</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-base-content/60">Confirmed</dt>
+                            <dd>
+                                @if ($duty->confirmed)
                                     <span class="badge badge-soft badge-success">Yes</span>
                                 @else
                                     <span class="badge badge-soft">No</span>
@@ -143,9 +153,17 @@
                 </div>
 
             <div class="mt-4 flex items-center gap-2">
-                <input type="checkbox" name="covered" value="1" class="checkbox" id="edit-duty-covered" @checked($duty->covered) />
-                <label for="edit-duty-covered" class="fieldset-label">Covered</label>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="covered" value="1" class="checkbox" id="edit-duty-covered" @checked($duty->covered) />
+                    <label for="edit-duty-covered" class="fieldset-label">Covered</label>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="confirmed" value="1" class="checkbox" id="edit-duty-confirmed" @checked($duty->confirmed) />
+                    <label for="edit-duty-confirmed" class="fieldset-label">Confirmed</label>
+                </div>
             </div>
+
 
             <div class="mt-4">
                 <label class="fieldset-label">Notes</label>

@@ -14,6 +14,7 @@
                             <th>Organiser</th>
                             <th>Start</th>
                             <th>End</th>
+                            <th>Confirmed</th>
                             <th>Covered</th>
                             <th class="w-20"></th>
                         </tr>
@@ -27,6 +28,13 @@
                                 <td>{{ $duty->organiser }}</td>
                                 <td>{{ $duty->start_time->format('j M Y, H:i') }}</td>
                                 <td>{{ $duty->end_time->format('j M Y, H:i') }}</td>
+                                <td>
+                                    @if ($duty->confirmed)
+                                        <span class="badge badge-soft badge-success">Yes</span>
+                                    @else
+                                        <span class="badge badge-soft">No</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if ($duty->covered)
                                         <span class="badge badge-soft badge-success">Yes</span>
@@ -110,8 +118,15 @@
                 </div>
 
             <div class="mt-4 flex items-center gap-2">
-                <input type="checkbox" name="covered" value="1" class="checkbox" id="duty-covered" />
-                <label for="duty-covered" class="fieldset-label">Covered</label>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="covered" value="1" class="checkbox" id="duty-covered" />
+                    <label for="duty-covered" class="fieldset-label">Covered</label>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="confirmed" value="1" class="checkbox" id="duty-confirmed" />
+                    <label for="duty-confirmed" class="fieldset-label">Confirmed</label>
+                </div>
             </div>
 
             <div class="mt-4">

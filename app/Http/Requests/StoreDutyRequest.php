@@ -21,6 +21,7 @@ class StoreDutyRequest extends FormRequest
             'start_time' => ['required', 'date'],
             'end_time' => ['required', 'date', 'after:start_time'],
             'covered' => ['boolean'],
+            'confirmed' => ['boolean'],
             'notes' => ['nullable', 'string'],
             'member_ids' => ['nullable', 'array'],
             'member_ids.*' => ['exists:members,id'],
@@ -33,6 +34,7 @@ class StoreDutyRequest extends FormRequest
     {
         $this->merge([
             'covered' => $this->boolean('covered'),
+            'confirmed' => $this->boolean('confirmed'),
             'start_time' => $this->start_date && $this->start_hour && $this->start_minute
                 ? $this->start_date . ' ' . $this->start_hour . ':' . $this->start_minute
                 : $this->start_time,
