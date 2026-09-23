@@ -131,7 +131,7 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get('/');
 
-        $response->assertViewHas('busiestMonth', null);
+        $response->assertViewHas('busiestMonth');
     }
 
     #[Test]
@@ -144,7 +144,7 @@ class DashboardTest extends TestCase
         $response->assertViewHas('totalDuties', 0);
         $response->assertViewHas('averageMembersPerDuty', 0);
         $response->assertViewHas('averageDutiesPerMember', 0);
-        $response->assertViewHas('busiestVehicle', null);
+        $response->assertViewHas('busiestVehicle');
         $response->assertViewHas('uncoveredUpcomingDuties', 0);
         $response->assertViewHas('upcomingUncoveredDuties', fn ($duties) => $duties->isEmpty());
         $response->assertViewHas('assignedHoursByClinicalLevel', []);

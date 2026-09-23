@@ -22,7 +22,7 @@ class UserInvited extends Notification
     {
         $token = Password::createToken($notifiable);
 
-        return (new MailMessage())
+        return new MailMessage()
             ->subject('You have been invited to Duty Manager')
             ->line('An account has been created for you on Duty Manager.')
             ->action('Set Your Password', route('password.reset', ['token' => $token, 'email' => $notifiable->email]))

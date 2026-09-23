@@ -9,6 +9,7 @@
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.6",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.2",
         "laravel/pail": "^1.2.5",
@@ -46,6 +47,14 @@
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
+        ],
+        "coverage": [
+            "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan test --coverage"
+        ],
+        "format": [
+            "vendor/bin/rector",
+            "vendor/bin/pint"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

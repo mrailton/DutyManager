@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Members;
 
+use App\Models\Duty;
 use App\Models\Member;
 use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
@@ -151,7 +152,7 @@ class MemberTest extends TestCase
     {
         $user = User::factory()->create();
         $member = Member::factory()->create(['name' => 'Alice Smith']);
-        $duty = \App\Models\Duty::factory()->create(['name' => 'Weekend Shift']);
+        $duty = Duty::factory()->create(['name' => 'Weekend Shift']);
         $member->duties()->attach($duty);
 
         $response = $this->actingAs($user)->get('/members/' . $member->id);

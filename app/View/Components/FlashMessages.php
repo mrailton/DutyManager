@@ -10,7 +10,7 @@ use Illuminate\View\Component;
 
 class FlashMessages extends Component
 {
-    private const STYLES = [
+    private const array STYLES = [
         'success' => ['border' => 'border-green-400', 'bg' => 'bg-green-50', 'text' => 'text-green-800', 'icon' => 'text-green-400'],
         'info' => ['border' => 'border-blue-400', 'bg' => 'bg-blue-50', 'text' => 'text-blue-800', 'icon' => 'text-blue-400'],
         'warning' => ['border' => 'border-yellow-400', 'bg' => 'bg-yellow-50', 'text' => 'text-yellow-800', 'icon' => 'text-yellow-400'],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Duties;
 
+use App\Models\Duty;
 use App\Models\Member;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -37,7 +38,7 @@ class DutyTest extends TestCase
     public function theIndexDisplaysExistingDuties(): void
     {
         $user = User::factory()->create();
-        $duty = \App\Models\Duty::factory()->create(['name' => 'Night Shift']);
+        Duty::factory()->create(['name' => 'Night Shift']);
 
         $response = $this->actingAs($user)->get('/duties');
 
@@ -69,7 +70,7 @@ class DutyTest extends TestCase
             'organiser' => 'John Smith',
         ]);
 
-        $duty = \App\Models\Duty::where('name', 'Morning Duty')->first();
+        $duty = Duty::where('name', 'Morning Duty')->first();
         $this->assertTrue($duty->members->contains($member));
         $this->assertTrue($duty->vehicles->contains($vehicle));
     }
@@ -154,7 +155,7 @@ class DutyTest extends TestCase
         $user = User::factory()->create();
         $member = Member::factory()->create();
         $vehicle = Vehicle::factory()->create();
-        $duty = \App\Models\Duty::factory()->create(['name' => 'Event Duty']);
+        $duty = Duty::factory()->create(['name' => 'Event Duty']);
         $duty->members()->attach($member);
         $duty->vehicles()->attach($vehicle);
 
@@ -169,7 +170,7 @@ class DutyTest extends TestCase
     #[Test]
     public function aGuestCannotViewADuty(): void
     {
-        $duty = \App\Models\Duty::factory()->create();
+        $duty = Duty::factory()->create();
 
         $response = $this->get('/duties/' . $duty->id);
 
@@ -182,7 +183,7 @@ class DutyTest extends TestCase
         $user = User::factory()->create();
         $member = Member::factory()->create();
         $vehicle = Vehicle::factory()->create();
-        $duty = \App\Models\Duty::factory()->create(['name' => 'Original Name']);
+        $duty = Duty::factory()->create(['name' => 'Original Name']);
         $duty->members()->attach($member);
         $duty->vehicles()->attach($vehicle);
 
@@ -218,7 +219,7 @@ class DutyTest extends TestCase
     #[Test]
     public function aGuestCannotUpdateADuty(): void
     {
-        $duty = \App\Models\Duty::factory()->create();
+        $duty = Duty::factory()->create();
 
         $response = $this->put('/duties/' . $duty->id, [
             'name' => 'Hacked Name',
@@ -251,7 +252,7 @@ class DutyTest extends TestCase
         $response->assertSessionHas('flash', fn (array $flash) => ($flash['type'] ?? null) === 'success');
         $this->assertDatabaseHas('duties', ['name' => 'Split Time Duty']);
 
-        $duty = \App\Models\Duty::where('name', 'Split Time Duty')->first();
+        $duty = Duty::where('name', 'Split Time Duty')->first();
         $this->assertEquals('2026-08-01 09:00:00', $duty->start_time->format('Y-m-d H:i:s'));
         $this->assertEquals('2026-08-01 17:30:00', $duty->end_time->format('Y-m-d H:i:s'));
     }
@@ -260,7 +261,7 @@ class DutyTest extends TestCase
     public function aDutyCanBeUpdatedWithSplitDateAndTime(): void
     {
         $user = User::factory()->create();
-        $duty = \App\Models\Duty::factory()->create(['name' => 'Before Update']);
+        $duty = Duty::factory()->create(['name' => 'Before Update']);
 
         $response = $this->actingAs($user)->put('/duties/' . $duty->id, [
             'name' => 'After Update',
@@ -339,7 +340,7 @@ class DutyTest extends TestCase
     #[Test]
     public function duplicateDutyMemberAssignmentsAreRejectedAtTheDatabaseLevel(): void
     {
-        $duty = \App\Models\Duty::factory()->create();
+        $duty = Duty::factory()->create();
         $member = Member::factory()->create();
 
         $duty->members()->attach($member->id);
@@ -357,7 +358,7 @@ class DutyTest extends TestCase
     #[Test]
     public function duplicateDutyVehicleAssignmentsAreRejectedAtTheDatabaseLevel(): void
     {
-        $duty = \App\Models\Duty::factory()->create();
+        $duty = Duty::factory()->create();
         $vehicle = Vehicle::factory()->create();
 
         $duty->vehicles()->attach($vehicle->id);
@@ -380,7 +381,7 @@ class DutyTest extends TestCase
         $user = User::factory()->create();
         $member = Member::factory()->create();
         $vehicle = Vehicle::factory()->create();
-        $duty = \App\Models\Duty::factory()->create([
+        $duty = Duty::factory()->create([
             'start_time' => Carbon::parse('2026-07-10 10:00:00'),
             'end_time' => Carbon::parse('2026-07-10 12:00:00'),
         ]);
@@ -419,7 +420,7 @@ class DutyTest extends TestCase
     #[Test]
     public function aGuestCannotDeleteADuty(): void
     {
-        $duty = \App\Models\Duty::factory()->create();
+        $duty = Duty::factory()->create();
 
         $response = $this->delete('/duties/' . $duty->id);
 

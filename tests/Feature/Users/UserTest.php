@@ -35,7 +35,7 @@ class UserTest extends TestCase
     public function theIndexDisplaysExistingUsers(): void
     {
         $admin = User::factory()->create();
-        $other = User::factory()->create(['name' => 'Jane Smith']);
+        User::factory()->create(['name' => 'Jane Smith']);
 
         $response = $this->actingAs($admin)->get('/users');
 

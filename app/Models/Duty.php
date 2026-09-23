@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[Fillable(['name', 'organiser', 'start_time', 'end_time', 'covered', 'notes'])]
 class Duty extends Model
 {
     use HasFactory;
-
-    protected $fillable = ['name', 'organiser', 'start_time', 'end_time', 'covered', 'notes'];
 
     public function members(): BelongsToMany
     {

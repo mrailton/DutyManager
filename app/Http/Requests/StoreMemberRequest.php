@@ -18,7 +18,7 @@ class StoreMemberRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'clinical_level' => ['required', 'string', 'in:' . implode(',', array_map(fn ($case) => $case->value, ClinicalLevel::cases()))],
+            'clinical_level' => ['required', 'string', 'in:' . implode(',', array_map(fn (ClinicalLevel $case) => $case->value, ClinicalLevel::cases()))],
             'driver' => ['boolean'],
         ];
     }

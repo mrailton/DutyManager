@@ -19,7 +19,7 @@ class StoreVehicleRequest extends FormRequest
         return [
             'callsign' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
-            'role' => ['required', 'string', 'in:' . implode(',', array_map(fn ($case) => $case->value, VehicleRole::cases()))],
+            'role' => ['required', 'string', 'in:' . implode(',', array_map(fn (VehicleRole $case) => $case->value, VehicleRole::cases()))],
         ];
     }
 }
