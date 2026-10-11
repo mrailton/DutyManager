@@ -12,8 +12,10 @@ class ViewMemberController extends Controller
 {
     public function __invoke(Member $member): View
     {
-        $member->load(['duties' => fn ($query) => $query->latest('start_time')]);
+        $duties = $member->duties()
+            ->orderByDesc('duties.start_time')
+            ->paginate(2);
 
-        return view('members.show', ['member' => $member]);
+        return view('members.show', ['member' => $member, 'duties' => $duties]);
     }
 }
