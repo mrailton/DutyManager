@@ -12,7 +12,7 @@ class ViewMemberController extends Controller
 {
     public function __invoke(Member $member): View
     {
-        $member->load('duties');
+        $member->load(['duties' => fn ($query) => $query->latest('start_time')]);
 
         return view('members.show', ['member' => $member]);
     }

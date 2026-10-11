@@ -8,8 +8,8 @@
             <button @click="$refs.editModal.showModal()" class="btn btn-outline btn-primary">Edit</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <div class="lg:col-span-2 space-y-6">
+        <section>
+            <div class="lg:col-span-2 py-6">
                 <div class="card bg-base-100 shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title">Details</h2>
@@ -35,24 +35,30 @@
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="card bg-base-100 shadow-sm">
-                    <div class="card-body">
-                        <h2 class="card-title text-sm">Duties ({{ $member->duties->count() }})</h2>
-                        <ul class="space-y-2">
-                            @forelse($member->duties as $duty)
-                                <li>
-                                    <a href="{{ route('duties.show', $duty) }}" class="link text-sm font-medium">{{ $duty->name }}</a>
-                                    <div class="text-xs text-base-content/60">{{ $duty->start_time->format('j M Y, H:i') }} &mdash; {{ $duty->end_time->format('j M Y, H:i') }}</div>
-                                </li>
-                            @empty
-                                <li class="text-sm text-base-content/60">Not assigned to any duties.</li>
-                            @endforelse
-                        </ul>
-                    </div>
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-sm">Duties ({{ $member->duties->count() }})</h2>
+                    <table class="relative min-w-full divide-y divide-gray-300">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0">Name</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Start</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">End</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                        @foreach($member->duties as $duty)
+                        <tr>
+                            <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-0"><a href="{{ route('duties.show', $duty) }}">{{ $duty->name }}</a></td>
+                            <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{{ $duty->start_time->format('j M Y, H:i') }}</td>
+                            <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">{{ $duty->end_time->format('j M Y, H:i') }}</td>
+                        </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
+        </section>
 
         <x-modal name="editModal" title="Edit Member">
             <form :action="`/members/${editItem.id}`" method="POST" class="mt-4">
