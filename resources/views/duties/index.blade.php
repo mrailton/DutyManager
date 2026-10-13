@@ -172,11 +172,11 @@
         <form method="GET" action="{{ route('duties.export') }}" class="mt-4 space-y-4">
             <div>
                 <label class="fieldset-label">Start Date</label>
-                <input type="date" name="start_date" class="input w-full" />
+                <input type="date" name="start_date" class="input w-full" value="{{ now()->startOfYear()->format('Y-m-d') }}" />
             </div>
             <div>
                 <label class="fieldset-label">End Date</label>
-                <input type="date" name="end_date" class="input w-full" />
+                <input type="date" name="end_date" class="input w-full" value="{{ now()->format('Y-m-d') }}" />
             </div>
             <div class="modal-action">
                 <button type="submit" class="btn btn-primary">Export CSV</button>

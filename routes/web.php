@@ -16,6 +16,7 @@ use App\Http\Controllers\Duties\ListDutiesController;
 use App\Http\Controllers\Duties\StoreDutyController;
 use App\Http\Controllers\Duties\UpdateDutyController;
 use App\Http\Controllers\Duties\ViewDutyController;
+use App\Http\Controllers\Members\ExportMembersController;
 use App\Http\Controllers\Members\ListMembersController;
 use App\Http\Controllers\Members\StoreMemberController;
 use App\Http\Controllers\Members\UpdateMemberController;
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('members')->as('members.')->group(function (): void {
         Route::get('/', ListMembersController::class)->name('index');
         Route::post('/', StoreMemberController::class)->name('store');
+        Route::get('/export', ExportMembersController::class)->name('export');
         Route::get('/{member}', ViewMemberController::class)->name('show');
         Route::put('/{member}', UpdateMemberController::class)->name('update');
     });
