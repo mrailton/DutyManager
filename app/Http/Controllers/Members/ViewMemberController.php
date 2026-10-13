@@ -14,7 +14,7 @@ class ViewMemberController extends Controller
     {
         $duties = $member->duties()
             ->orderByDesc('duties.start_time')
-            ->paginate(2);
+            ->paginate(10);
 
         return view('members.show', ['member' => $member, 'duties' => $duties]);
     }
