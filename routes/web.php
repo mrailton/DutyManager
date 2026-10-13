@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\StoreLoginController;
 use App\Http\Controllers\Auth\UpdatePasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Duties\DeleteDutyController;
+use App\Http\Controllers\Duties\ExportDutiesController;
 use App\Http\Controllers\Duties\ListDutiesController;
 use App\Http\Controllers\Duties\StoreDutyController;
 use App\Http\Controllers\Duties\UpdateDutyController;
@@ -53,6 +54,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('duties')->as('duties.')->group(function (): void {
         Route::get('/', ListDutiesController::class)->name('index');
         Route::post('/', StoreDutyController::class)->name('store');
+        Route::get('/export', ExportDutiesController::class)->name('export');
         Route::get('/{duty}', ViewDutyController::class)->name('show');
         Route::put('/{duty}', UpdateDutyController::class)->name('update');
         Route::delete('/{duty}', DeleteDutyController::class)->name('delete');

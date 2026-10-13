@@ -1,7 +1,10 @@
 <x-layout.app>
     <div class="flex items-center justify-between">
         <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Duties</h1>
-        <button @click="$refs.createModal.showModal()" class="btn btn-primary">Add Duty</button>
+        <span>
+            <button @click="$refs.exportModal.showModal()" class="btn btn-secondary ml-2">Export</button>
+            <button @click="$refs.createModal.showModal()" class="btn btn-primary">Add Duty</button>
+        </span>
     </div>
 
     <div class="card bg-base-100 mt-6 shadow-sm">
@@ -161,6 +164,23 @@
 
             <div class="modal-action">
                 <button type="submit" class="btn btn-primary">Create Duty</button>
+            </div>
+        </form>
+    </x-modal>
+
+    <x-modal name="exportModal" title="Export Duties" width="max-w-md">
+        <form method="GET" action="{{ route('duties.export') }}" class="mt-4 space-y-4">
+            <div>
+                <label class="fieldset-label">Start Date</label>
+                <input type="date" name="start_date" class="input w-full" />
+            </div>
+            <div>
+                <label class="fieldset-label">End Date</label>
+                <input type="date" name="end_date" class="input w-full" />
+            </div>
+            <div class="modal-action">
+                <button type="submit" class="btn btn-primary">Export CSV</button>
+                <button type="button" class="btn btn-ghost" x-ref="closeExportModal" @click="$refs.exportModal.close()">Close</button>
             </div>
         </form>
     </x-modal>
