@@ -16,11 +16,11 @@ FROM composer/composer:2-bin AS composer-bin
 
 FROM php:8.5-fpm-alpine AS vendor
 
+RUN apk add --no-cache git unzip zip libzip-dev
+
 RUN docker-php-ext-install -j$(nproc) pdo_mysql bcmath zip
 
 COPY --from=composer-bin /composer /usr/bin/composer
-
-RUN apk add --no-cache git unzip
 
 WORKDIR /app
 
