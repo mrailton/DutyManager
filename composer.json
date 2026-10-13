@@ -89,6 +89,10 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },"audit": {
+            "ignore-abandoned": {
+                "symplify/rule-doc-generator-contracts": "No security risk; solution in progress."
+            }
         }
     },
     "minimum-stability": "stable",
