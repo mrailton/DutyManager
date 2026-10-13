@@ -16,7 +16,7 @@ FROM composer/composer:2-bin AS composer-bin
 
 FROM php:8.5-fpm-alpine AS vendor
 
-RUN docker-php-ext-install -j$(nproc) pdo_mysql bcmath
+RUN docker-php-ext-install -j$(nproc) pdo_mysql bcmath zip
 
 COPY --from=composer-bin /composer /usr/bin/composer
 
@@ -26,7 +26,7 @@ WORKDIR /app
 
 COPY composer.json composer.lock ./
 
-RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader --audit
+RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
 
 FROM php:8.5-fpm-alpine
 
