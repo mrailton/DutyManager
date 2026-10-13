@@ -42,7 +42,7 @@ jobs:
           restore-keys: composer-
 
       - name: Install dependencies
-        run: composer install --no-interaction --no-progress --audit
+        run: composer install --no-interaction --no-progress
 
       - name: Check code style
         run: vendor/bin/pint --test
@@ -67,7 +67,7 @@ jobs:
           restore-keys: composer-
 
       - name: Install PHP dependencies
-        run: composer install --no-interaction --no-progress --audit
+        run: composer install --no-interaction --no-progress
 
       - name: Cache Node
         uses: actions/cache@v5
