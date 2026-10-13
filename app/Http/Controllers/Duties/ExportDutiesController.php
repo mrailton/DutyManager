@@ -30,6 +30,7 @@ class ExportDutiesController extends Controller
                 'Organiser' => $duty->organiser,
                 'Start Time' => $duty->start_time->format('Y-m-d H:i'),
                 'End Time' => $duty->end_time->format('Y-m-d H:i'),
+                'Duration (hours)' => $duty->start_time->diffInHours($duty->end_time),
                 'Number Vehicles' => $duty->vehicles->count(),
                 'Number Members' => $duty->members->count(),
             ]);
