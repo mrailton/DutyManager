@@ -14,6 +14,11 @@ class UpdateDutyController extends Controller
     public function __invoke(StoreDutyRequest $request, Duty $duty): RedirectResponse
     {
         $data = $request->validated();
+        if (array_key_exists('invoice_amount', $data)) {
+            $data['invoice_amount'] = (null !== $data['invoice_amount'] && '' !== $data['invoice_amount'])
+                ? (int) round(((float) $data['invoice_amount']) * 100)
+                : null;
+        }
         $duty->update($data);
 
         if (array_key_exists('member_ids', $data)) {

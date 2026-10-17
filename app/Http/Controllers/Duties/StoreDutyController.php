@@ -14,6 +14,11 @@ class StoreDutyController extends Controller
     public function __invoke(StoreDutyRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        if (array_key_exists('invoice_amount', $data)) {
+            $data['invoice_amount'] = (null !== $data['invoice_amount'] && '' !== $data['invoice_amount'])
+                ? (int) round(((float) $data['invoice_amount']) * 100)
+                : null;
+        }
         $duty = Duty::create($data);
 
         if ($data['member_ids'] ?? false) {

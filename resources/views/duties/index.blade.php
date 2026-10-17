@@ -19,6 +19,8 @@
                             <th>End</th>
                             <th>Confirmed</th>
                             <th>Covered</th>
+                            <th>Invoice Sent</th>
+                            <th>Invoice Paid</th>
                             <th class="w-20"></th>
                         </tr>
                     </thead>
@@ -46,12 +48,26 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if ($duty->invoice_sent)
+                                        <span class="badge badge-soft badge-success">Yes</span>
+                                    @else
+                                        <span class="badge badge-soft">No</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($duty->invoice_paid)
+                                        <span class="badge badge-soft badge-success">Yes</span>
+                                    @else
+                                        <span class="badge badge-soft">No</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <a href="{{ route('duties.show', $duty) }}" class="btn btn-ghost btn-sm">View</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-8 text-base-content/60">
+                                <td colspan="9" class="text-center py-8 text-base-content/60">
                                     No duties found.
                                 </td>
                             </tr>
@@ -129,6 +145,21 @@
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="confirmed" value="1" class="checkbox" id="duty-confirmed" />
                     <label for="duty-confirmed" class="fieldset-label">Confirmed</label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <label class="fieldset-label">Invoice Amount</label>
+                    <input type="number" step="0.01" min="0" name="invoice_amount" class="input w-full" placeholder="0.00" />
+                </div>
+                <div>
+                    <label class="fieldset-label">Invoice Sent</label>
+                    <input type="date" name="invoice_sent" class="input w-full" />
+                </div>
+                <div>
+                    <label class="fieldset-label">Invoice Paid</label>
+                    <input type="date" name="invoice_paid" class="input w-full" />
                 </div>
             </div>
 

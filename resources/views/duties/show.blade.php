@@ -58,6 +58,44 @@
                     @endif
                 </div>
             </div>
+
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title">Invoice Details</h2>
+                    <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <dt class="text-sm text-base-content/60">Invoice Amount</dt>
+                            <dd class="font-medium">
+                                @if ($duty->invoice_amount !== null)
+                                    {{ number_format($duty->invoice_amount / 100, 2) }}
+                                @else
+                                    <span class="text-base-content/40">—</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-base-content/60">Invoice Sent</dt>
+                            <dd class="font-medium">
+                                @if ($duty->invoice_sent)
+                                    {{ $duty->invoice_sent->format('l, j F Y') }}
+                                @else
+                                    <span class="text-base-content/40">—</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm text-base-content/60">Invoice Paid</dt>
+                            <dd class="font-medium">
+                                @if ($duty->invoice_paid)
+                                    {{ $duty->invoice_paid->format('l, j F Y') }}
+                                @else
+                                    <span class="text-base-content/40">—</span>
+                                @endif
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
         </div>
 
         <div class="space-y-6">
@@ -164,6 +202,20 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <label class="fieldset-label">Invoice Amount</label>
+                    <input type="number" step="0.01" min="0" name="invoice_amount" value="{{ $duty->invoice_amount !== null ? number_format($duty->invoice_amount / 100, 2, '.', '') : '' }}" class="input w-full" placeholder="0.00" />
+                </div>
+                <div>
+                    <label class="fieldset-label">Invoice Sent</label>
+                    <input type="date" name="invoice_sent" value="{{ $duty->invoice_sent?->format('Y-m-d') }}" class="input w-full" />
+                </div>
+                <div>
+                    <label class="fieldset-label">Invoice Paid</label>
+                    <input type="date" name="invoice_paid" value="{{ $duty->invoice_paid?->format('Y-m-d') }}" class="input w-full" />
+                </div>
+            </div>
 
             <div class="mt-4">
                 <label class="fieldset-label">Notes</label>

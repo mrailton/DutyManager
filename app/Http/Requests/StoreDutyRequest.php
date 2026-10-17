@@ -27,6 +27,9 @@ class StoreDutyRequest extends FormRequest
             'member_ids.*' => ['exists:members,id'],
             'vehicle_ids' => ['nullable', 'array'],
             'vehicle_ids.*' => ['exists:vehicles,id'],
+            'invoice_amount' => ['nullable', 'numeric', 'min:0'],
+            'invoice_sent' => ['nullable', 'date'],
+            'invoice_paid' => ['nullable', 'date'],
         ];
     }
 

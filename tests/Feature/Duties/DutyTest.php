@@ -46,6 +46,30 @@ class DutyTest extends TestCase
     }
 
     #[Test]
+    public function theIndexDisplaysInvoiceSentAndPaidStatus(): void
+    {
+        $user = User::factory()->create();
+        Duty::factory()->create([
+            'name' => 'Paid Duty',
+            'invoice_sent' => '2026-08-01',
+            'invoice_paid' => '2026-08-05',
+        ]);
+        Duty::factory()->create([
+            'name' => 'Unpaid Duty',
+            'invoice_sent' => null,
+            'invoice_paid' => null,
+        ]);
+
+        $response = $this->actingAs($user)->get('/duties');
+
+        $response->assertOk();
+        $response->assertSee('Invoice Sent');
+        $response->assertSee('Invoice Paid');
+        $response->assertSee('Paid Duty');
+        $response->assertSee('Unpaid Duty');
+    }
+
+    #[Test]
     public function aDutyCanBeCreated(): void
     {
         $user = User::factory()->create();
@@ -426,5 +450,100 @@ class DutyTest extends TestCase
 
         $response->assertRedirect('/login');
         $this->assertDatabaseHas('duties', ['id' => $duty->id]);
+    }
+
+    #[Test]
+    public function aDutyCanBeCreatedWithInvoiceDetails(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/duties', [
+            'name' => 'Invoiced Duty',
+            'organiser' => 'Acme Corp',
+            'start_time' => '2026-07-20T08:00',
+            'end_time' => '2026-07-20T16:00',
+            'invoice_amount' => '150.50',
+            'invoice_sent' => '2026-07-21',
+            'invoice_paid' => '2026-07-25',
+        ]);
+
+        $response->assertRedirect('/duties');
+        $duty = Duty::where('name', 'Invoiced Duty')->firstOrFail();
+        $this->assertEquals(15050, $duty->invoice_amount);
+        $this->assertEquals('2026-07-21', $duty->invoice_sent->format('Y-m-d'));
+        $this->assertEquals('2026-07-25', $duty->invoice_paid->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function aDutyCanBeUpdatedWithInvoiceDetails(): void
+    {
+        $user = User::factory()->create();
+        $duty = Duty::factory()->create([
+            'invoice_amount' => 10000,
+            'invoice_sent' => '2026-07-01',
+            'invoice_paid' => null,
+        ]);
+
+        $response = $this->actingAs($user)->put('/duties/' . $duty->id, [
+            'name' => $duty->name,
+            'organiser' => $duty->organiser,
+            'start_time' => $duty->start_time->format('Y-m-d\TH:i'),
+            'end_time' => $duty->end_time->format('Y-m-d\TH:i'),
+            'invoice_amount' => '250.00',
+            'invoice_sent' => '2026-07-02',
+            'invoice_paid' => '2026-07-10',
+        ]);
+
+        $response->assertRedirect('/duties/' . $duty->id);
+        $duty->refresh();
+        $this->assertEquals(25000, $duty->invoice_amount);
+        $this->assertEquals('2026-07-02', $duty->invoice_sent->format('Y-m-d'));
+        $this->assertEquals('2026-07-10', $duty->invoice_paid->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function theShowPageDisplaysInvoiceDetails(): void
+    {
+        $user = User::factory()->create();
+        $duty = Duty::factory()->create([
+            'name' => 'Charity Marathon',
+            'invoice_amount' => 12500,
+            'invoice_sent' => '2026-08-01',
+            'invoice_paid' => '2026-08-05',
+        ]);
+
+        $response = $this->actingAs($user)->get('/duties/' . $duty->id);
+
+        $response->assertOk();
+        $response->assertSee('Invoice Details');
+        $response->assertSee('125.00');
+        $response->assertSee($duty->invoice_sent->format('l, j F Y'));
+        $response->assertSee($duty->invoice_paid->format('l, j F Y'));
+    }
+
+    #[Test]
+    public function theCreateAndEditModalsContainInvoiceFields(): void
+    {
+        $user = User::factory()->create();
+        $duty = Duty::factory()->create([
+            'invoice_amount' => 7550,
+            'invoice_sent' => '2026-08-01',
+            'invoice_paid' => '2026-08-03',
+        ]);
+
+        $indexResponse = $this->actingAs($user)->get('/duties');
+        $indexResponse->assertOk();
+        $indexResponse->assertSeeHtml('name="invoice_amount"');
+        $indexResponse->assertSeeHtml('name="invoice_sent"');
+        $indexResponse->assertSeeHtml('name="invoice_paid"');
+
+        $showResponse = $this->actingAs($user)->get('/duties/' . $duty->id);
+        $showResponse->assertOk();
+        $showResponse->assertSeeHtml('name="invoice_amount"');
+        $showResponse->assertSeeHtml('value="75.50"');
+        $showResponse->assertSeeHtml('name="invoice_sent"');
+        $showResponse->assertSeeHtml('value="2026-08-01"');
+        $showResponse->assertSeeHtml('name="invoice_paid"');
+        $showResponse->assertSeeHtml('value="2026-08-03"');
     }
 }
