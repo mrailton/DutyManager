@@ -51,5 +51,5 @@ CMD []
 USER root
 RUN composer install --prefer-dist --no-interaction && chown -R www-data:www-data vendor
 USER www-data
-COPY .env.example ./.env
+COPY --chown=www-data:www-data .env.example ./.env
 RUN php artisan key:generate
