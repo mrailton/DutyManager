@@ -51,3 +51,4 @@ CMD []
 USER root
 RUN composer install --prefer-dist --no-interaction && chown -R www-data:www-data vendor
 USER www-data
+RUN php artisan key:generate
