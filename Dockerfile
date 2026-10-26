@@ -1,69 +1,53 @@
-FROM node:22-alpine AS node
-
+# 1. PHP dependencies only (cached on composer.json / composer.lock)
+FROM serversideup/php:8.5-cli AS deps
+USER root
+RUN install-php-extensions intl
 WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
-COPY package.json package-lock.json .npmrc* ./
-
-RUN npm ci --ignore-scripts --no-audit --no-fund && \
-    npm rebuild && \
-    npm cache clean --force
-
+# 2. Frontend assets (needs vendor for the PHP package's JS)
+FROM node:22-alpine AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY --from=deps /app/vendor ./vendor
 COPY . .
-
 RUN npm run build
 
-FROM composer/composer:2-bin AS composer-bin
+# 3. Optimised autoloader (needs app source)
+FROM deps AS vendor
+COPY . .
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 
-FROM php:8.5-fpm-alpine AS vendor
+# 4. Runtime
+FROM serversideup/php:8.5-fpm-nginx AS runtime
 
-RUN apk add --no-cache git unzip zip libzip-dev
-
-RUN docker-php-ext-install -j$(nproc) pdo_mysql bcmath zip
-
-COPY --from=composer-bin /composer /usr/bin/composer
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-
-RUN composer install --no-dev --no-interaction --no-progress --no-scripts --optimize-autoloader
-
-FROM php:8.5-fpm-alpine
-
-RUN set -eux; \
-    apk add --no-cache \
-        nginx \
-        supervisor \
-        curl \
-    ; \
-    docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        bcmath
-
-COPY --from=vendor /app/vendor /var/www/html/vendor
-COPY --from=node /app/public/build /var/www/html/public/build
-
-COPY . /var/www/html
-
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/php.ini $PHP_INI_DIR/conf.d/99-production.ini
+ENV SSL_MODE=off \
+    PHP_OPCACHE_ENABLE=1 \
+    PHP_FPM_PM_CONTROL=ondemand \
+    PHP_FPM_PM_MAX_CHILDREN=10 \
+    PHP_FPM_PROCESS_IDLE_TIMEOUT=30s
 
 WORKDIR /var/www/html
+COPY --chown=www-data:www-data . .
+COPY --chown=www-data:www-data --from=vendor /app/vendor ./vendor
+COPY --chown=www-data:www-data --from=assets /app/public/build ./public/build
 
-RUN php artisan package:discover --ansi
+USER root
+RUN install-php-extensions intl
+COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+USER www-data
 
-RUN set -eux; \
-    chown -R www-data:www-data \
-        storage \
-        bootstrap/cache \
-        public/build \
-    ; \
-    chmod -R 775 storage bootstrap/cache
+EXPOSE 8080
 
-EXPOSE 80
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/init"]
 
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-ENTRYPOINT ["docker-entrypoint.sh"]
+# 5. Test (CI only, never deployed)
+FROM runtime AS test
+ENTRYPOINT []
+CMD []
+USER root
+RUN composer install --prefer-dist --no-interaction && chown -R www-data:www-data vendor
+USER www-data
