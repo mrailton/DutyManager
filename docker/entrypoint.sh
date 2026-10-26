@@ -24,5 +24,4 @@ php artisan view:cache --no-interaction
 echo "Running migrations..."
 php artisan migrate --force --no-interaction
 
-echo "Starting supervisor..."
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+exec docker-php-serversideup-entrypoint "$@"
